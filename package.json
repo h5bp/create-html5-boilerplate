@@ -1,13 +1,14 @@
 {
   "name": "create-html5-boilerplate",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "index.js",
   "scripts": {
+    "create-html5-boilerplate": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Vlad Tansky",
   "license": "ISC",
   "dependencies": {
     "yargs": "^15.3.1",
