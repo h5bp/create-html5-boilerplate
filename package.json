@@ -1,18 +1,19 @@
 {
   "name": "create-html5-boilerplate",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "",
   "main": "index.js",
+  "bin": {
+    "create-html5-boilerplate": "./index.js"
+  },
   "scripts": {
-    "create-html5-boilerplate": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "try": "node ./index.js"
   },
   "keywords": [],
   "author": "Vlad Tansky",
   "license": "ISC",
   "dependencies": {
-    "yargs": "^15.3.1",
-    "got": "^11.1.0",
     "request": "^2.88.2",
     "unzipper": "^0.10.11"
   }
