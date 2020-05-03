@@ -1,0 +1,17 @@
+{
+  "name": "create-html5-boilerplate",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "got": "^11.1.0",
+    "request": "^2.88.2",
+    "unzipper": "^0.10.11"
+  }
+}
