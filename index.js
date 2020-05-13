@@ -23,7 +23,7 @@ const elapsed = require("elapsed-time-logger");
     }catch(err){
         await fs.remove(tempDir);
         if(err.code === 'ETARGET'){
-            spinner.fail(chalk.red(`version '${err.wanted}' not found in npm registry\navaialable versions:`));
+            spinner.fail(chalk.red(`version '${err.wanted}' not found in npm registry\navailable versions:`));
             console.log(err.versions.reverse().join(' | '));
         }else{
             spinner.fail('Unexpected error');
