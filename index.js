@@ -1,37 +1,44 @@
 #!/usr/bin/env node
 'use strict'
-
-const util = require('util');
+const argv = require('yargs-parser')(process.argv.slice(2), {alias:{release: ['r']}})
 const path = require("path");
 const chalk = require('chalk');
 const ora = require("ora");
-const unzipper = require('unzipper');
-const request_original = require('request');//TODO: maybe use got or smth else as request is deprecated
-const request = util.promisify(request_original);
+const pacote = require('pacote');
+const fs = require("fs-extra");
+const os = require('os');
+const packageName = 'html5-boilerplate';
 
-const args = process.argv.slice(2);
+const extract = async(tempDir, version = '') => {
+    return new Promise((resolve, reject) => {
+        pacote.extract(packageName+'@'+version, tempDir, {})
+        .then(res=>resolve(res))
+        .catch(err=>{
+            reject(err);
+        });
+    });
+}
 
 (async () => {
-    const spinner = ora('Fetching latest release version').start();
-
-    const {error, response, body} = await request({
-        url:'https://api.github.com/repos/h5bp/html5-boilerplate/releases/latest',
-        headers: {
-            'User-Agent': 'request'
+    const version = argv['release'];
+    const targetDir = path.resolve(argv['_'][0] || './');
+    const spinner = ora(`Downloading ${packageName} ${version ? 'version '+version : 'latest version'} to ${targetDir}`).start();
+    const tempDir = os.tmpdir()+`/${packageName}-staging`;
+    await fs.ensureDir(tempDir);
+    try{
+        const { from: nameWithVersion } = await extract(tempDir, version);//{from, resolved, integrity}
+	    spinner.text = `${nameWithVersion} copied to ${targetDir}. Have fun!`;
+    }catch(err){
+        if(err.code === 'ETARGET' && err.type === 'tag'){
+            console.log(chalk.red(`version '${err.wanted}' not found in npm registry\navaialable versions:`));
+            console.log(err.versions.reverse().join(' | '));
+        }else{
+            console.log(err);
         }
-    });
-    if(error){
-        Promise.reject("smth wrong TODO: error message");
+        process.exit(0);
     }
-    const data = JSON.parse(body);
-    const version = data.name;
-    const zipURL = data.assets[0].browser_download_url;
-    if(!zipURL){
-        Promise.reject('Unexpected error: zipURL not defined')
-    }
-    const extractPath = path.normalize(args[0] || '');
-	spinner.text = `Copying html5-boilerplate ${version} to ${extractPath}`;
-    await unzipper.Open.url(request_original, zipURL).then(d=>d.extract({path: path.resolve(extractPath)}));
-	spinner.text = `html5-boilerplate copied ${version} to ${extractPath}. Have fun!`;
+    await fs.copy(tempDir+'/dist', targetDir);
+    await fs.remove(tempDir);
     spinner.succeed();
+    return;
 })();

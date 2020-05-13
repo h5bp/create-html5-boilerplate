@@ -15,8 +15,9 @@
   "license": "ISC",
   "dependencies": {
     "chalk": "^4.0.0",
+    "fs-extra": "^9.0.0",
     "ora": "^4.0.4",
-    "request": "^2.88.2",
-    "unzipper": "^0.10.11"
+    "pacote": "^11.1.10",
+    "yargs-parser": "^18.1.3"
   }
 }
