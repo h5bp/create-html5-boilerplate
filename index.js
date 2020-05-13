@@ -8,8 +8,10 @@ const { extract } = require('pacote');
 const fs = require("fs-extra");
 const os = require('os');
 const packageName = 'html5-boilerplate';
+const elapsed = require("elapsed-time-logger");
 
 (async () => {
+    const timer = elapsed.start();
     const version = argv['release'] || 'latest';
     const targetDir = path.resolve(argv['_'][0] || './');
     const spinner = ora(`Downloading ${packageName} version '${version}' to ${targetDir}`).start();
@@ -17,7 +19,7 @@ const packageName = 'html5-boilerplate';
     await fs.ensureDir(tempDir);
     try{
         const { from: nameWithVersion } = await extract(packageName + '@' + version, tempDir, {});
-	    spinner.text = `${nameWithVersion} copied to ${targetDir}. Have fun!`;
+	    spinner.text = `${nameWithVersion} copied to ${targetDir} in ${timer.get()}. Have fun!`;
     }catch(err){
         await fs.remove(tempDir);
         if(err.code === 'ETARGET'){
