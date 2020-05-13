@@ -10,13 +10,13 @@ const os = require('os');
 const packageName = 'html5-boilerplate';
 
 (async () => {
-    const version = argv['release'] || '';
+    const version = argv['release'] || 'latest';
     const targetDir = path.resolve(argv['_'][0] || './');
-    const spinner = ora(`Downloading ${packageName} ${version ? 'version '+version : 'latest version'} to ${targetDir}`).start();
+    const spinner = ora(`Downloading ${packageName} version '${version}' to ${targetDir}`).start();
     const tempDir = os.tmpdir()+`/${packageName}-staging`;
     await fs.ensureDir(tempDir);
     try{
-        const { from: nameWithVersion } = await extract(packageName+'@'+version, tempDir, {});
+        const { from: nameWithVersion } = await extract(packageName + '@' + version, tempDir, {});
 	    spinner.text = `${nameWithVersion} copied to ${targetDir}. Have fun!`;
     }catch(err){
         await fs.remove(tempDir);
