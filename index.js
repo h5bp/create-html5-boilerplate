@@ -20,7 +20,7 @@ const packageName = 'html5-boilerplate';
 	    spinner.text = `${nameWithVersion} copied to ${targetDir}. Have fun!`;
     }catch(err){
         await fs.remove(tempDir);
-        if(err.code === 'ETARGET' && err.type === 'tag'){
+        if(err.code === 'ETARGET'){
             spinner.fail(chalk.red(`version '${err.wanted}' not found in npm registry\navaialable versions:`));
             console.log(err.versions.reverse().join(' | '));
         }else{
