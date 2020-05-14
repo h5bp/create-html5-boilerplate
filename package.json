@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "jest",
+    "coverage": "jest --coverage --collectCoverageOnlyFrom ./cli.js",
     "start": "node ./index.js ./out"
   },
   "keywords": [],
