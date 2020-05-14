@@ -9,25 +9,33 @@ const tempDir = os.tmpdir()+`/${packageName}-staging`;
 // const { packument } = require('pacote');
 // const versions = await packument(packageName);
 // cases = ['', 'latest', '-r=7.3.0', ...Object.keys(versions)];
-const all_versions = ['0.0.1','5.3.0',
-'6.0.0', '6.0.1',
-'6.1.0', '7.0.0',
-'7.0.1', '7.1.0',
-'7.2.0', '7.3.0'];
+const all_versions = [
+  '0.0.1',
+  '5.3.0',
+  '6.0.0',
+  '6.0.1',
+  '6.1.0',
+  '7.0.0',
+  '7.0.1',
+  '7.1.0',
+  '7.2.0',
+  '7.3.0'
+];
 const cases = ['-r=7.2.0','-r=v7.2.0','-r=v7.2', '--release=7.3.0', ...all_versions.map(v=>'-r='+v)];
+
+const runCli = async(version) => {//TODO: blank output
+  process.argv.push(`./out/${version}`);
+  if(version){
+    process.argv.push(version)
+  }
+  await cli();
+  process.argv = process.argv.filter(v=>v!==version && v !== `./out/${version}`);//revert process args
+}
 describe.each(cases)(
     "Downloading %s",
     (version) => {
       beforeAll(async () => {
-        jest.spyOn(process, 'exit').mockImplementationOnce(() => {
-          throw new Error('process.exit() was called.'+version)
-        });
-        process.argv.push(`./out/${version}`);
-        if(version){
-          process.argv.push(version)
-        }
-        await cli();
-        process.argv = process.argv.filter(v=>v!==version && v !== `./out/${version}`);//revert process args
+        await runCli(version);
       });
       afterAll(async () => {
         await fs.remove(`./out/${version}`);
@@ -62,11 +70,16 @@ describe.each(cases)(
       });
     }
   );
-  // test('Attempt 1', async() => {
-  //     const spy = jest.spyOn(console, 'log');
 
-      // expect(() => {
-      // }).toThrow('process.exit() was called.');
-      // expect(spy.mock.calls).toEqual([['Testing...']]);
-      // expect(process.exit).toHaveBeenCalledWith(0);
-  // });
+  describe("Errors", () => {
+    test("wrong version 6..2.3", async()=>{
+      const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {});
+      const version = '-r=6..2.3';
+      
+      await runCli(version);
+      
+      await fs.remove(`./out/${version}`);
+      expect(mockExit).toHaveBeenCalledWith(1);
+      mockExit.mockRestore();
+    })
+  });
