@@ -4,7 +4,7 @@
 - [ ] feature request
 - [ ] other (Please do not submit support requests here (below))
 
-## Notes:
+## Notes
 
 * Please **do not** use the issue tracker for personal support requests (use
   [Stack Overflow](https://stackoverflow.com/questions/tagged/html5boilerplate)).
@@ -63,12 +63,9 @@ Example:
 > causing the bug, and potential solutions (and your opinions on their
 > merits).
 
-
 ## Feature requests
 
 Feature requests are welcome. But take a moment to find out whether your idea
 fits with the scope and aims of the project. It's up to *you* to make a strong
 case to convince the project's developers of the merits of this feature. Please
 provide as much detail and context as possible.
-
-
