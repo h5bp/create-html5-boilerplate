@@ -63,7 +63,7 @@ describe.each(cases)("Downloading %s", (version) => {
   if (version && version != "-r=latest") {
     // if we will fetch all versions from npm registry we will be able to check latest
     // for now we will skip this test for 'latest' version
-    test(`version ${version}`, async () => {
+    test(`Version is correct: ${version}`, async () => {
       const cssContent = await fs.readFile(
         `./out/${version}/css/main.css`,
         "utf-8"
@@ -81,17 +81,17 @@ describe.each(cases)("Downloading %s", (version) => {
     });
   }
 
-  test("./out directory exists", async () => {
+  test("Target directory exists", async () => {
     const outDirExists = await fs.exists(versionFolder(version));
     expect(outDirExists).toBe(true);
   });
 
-  test("./out directory have files", async () => {
+  test("Target directory have files", async () => {
     const dirContents = await fs.readdir(versionFolder(version));
-    expect(dirContents.length).toBeGreaterThanOrEqual(5);
+    expect(dirContents.length).toBeGreaterThanOrEqual(7);
   });
 
-  test("./out directory specific files", async () => {
+  test("Target directory contains specific files", async () => {
     const dirContents = await fs.readdir(versionFolder(version));
     const check = [
       "index.html",
@@ -104,14 +104,14 @@ describe.each(cases)("Downloading %s", (version) => {
     expect(check.length === 0).toBe(true);
   });
 
-  test("Temp dir removed", async () => {
+  test("Temp directory removed", async () => {
     const tempDirExists = await fs.exists(tempDir);
     expect(tempDirExists).toBe(false);
   });
 });
 
 describe("Errors", () => {
-  test("wrong version 6..2.3", async () => {
+  test("Wrong version 6..2.3", async () => {//maybe create test.each() for more errors scenarios
     const mockExit = jest.spyOn(process, "exit").mockImplementation(() => {});
     const version = "-r=6..2.3";
 
