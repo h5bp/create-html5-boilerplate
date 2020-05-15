@@ -11,8 +11,8 @@
     "type": "git",
     "url": "https://github.com/h5bp/create-html5-boilerplate.git"
   },
-  "license": "ISC",
-  "author": "Vlad Tansky",
+  "license": "MIT",
+  "author": "@h5bp",
   "main": "index.js",
   "bin": {
     "create-html5-boilerplate": "./index.js"
