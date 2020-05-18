@@ -24,6 +24,7 @@ const all_versions = [
 const cases = [
   null,
   "-r=latest",
+  "-r=7",
   "-r=7.2.0",
   "-r=v7.2.0",
   "-r=v7.2",
@@ -49,7 +50,7 @@ const runCli = async (version = null) => {
       (v) => v !== version && v !== versionFolder(version)
     ); //revert process args
   } else {
-    process.chdir(prevCwd);//revert process current dir
+    process.chdir(prevCwd); //revert process current dir
   }
 };
 describe.each(cases)("Downloading %s", (version) => {
@@ -111,14 +112,29 @@ describe.each(cases)("Downloading %s", (version) => {
 });
 
 describe("Errors", () => {
-  test("Wrong version 6..2.3", async () => {//maybe create test.each() for more errors scenarios
-    const mockExit = jest.spyOn(process, "exit").mockImplementation(() => {});
+  test("Wrong version 6..2.3", async () => {
+    //maybe create test.each() for more errors scenarios
     const version = "-r=6..2.3";
+    try {
+      await runCli(version);
+    } catch (err) {
+      expect(err).toBe("ETARGET");
+    } finally {
+      await fs.remove(versionFolder(version));
+    }
+  });
+});
 
-    await runCli(version);
-
-    await fs.remove(versionFolder(version));
-    expect(mockExit).toHaveBeenCalledWith(1);
-    mockExit.mockRestore();
+describe("Unexpected errors", () => {
+  test("Unexpected error 6..2.3,7.2.3", async () => {
+    //maybe create test.each() for more errors scenarios
+    const version = "-r=6..2.3,7.2.3";
+    try {
+      await runCli(version);
+    } catch (err) {
+      expect(err).not.toBe("ETARGET");
+    } finally {
+      await fs.remove(versionFolder(version));
+    }
   });
 });
