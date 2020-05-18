@@ -23,7 +23,6 @@ module.exports = async () => {
 	    spinner.text = `${nameWithVersion} copied to ${targetDir} in ${timer.get()}. Have fun!`;
     }catch(err){
         await fs.remove(tempDir);
-        /* istanbul ignore else */
         if(err.code === 'ETARGET'){
             const msg = chalk.red(`version '${err.wanted}' not found in npm registry\navailable versions:\n`)
             spinner.fail(msg+err.versions.reverse().join(' | '));
