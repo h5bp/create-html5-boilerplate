@@ -24,15 +24,12 @@ module.exports = async () => {
     }catch(err){
         await fs.remove(tempDir);
         if(err.code === 'ETARGET'){
-            spinner.fail(chalk.red(`version '${err.wanted}' not found in npm registry\navailable versions:`));
-            console.log(err.versions.reverse().join(' | '));
-            process.exit(1);
-        }/* istanbul ignore next */else{
-            spinner.fail('Unexpected error');
-            console.error(err);
-            process.exit(-1);
-        };
-        return;
+            const msg = chalk.red(`version '${err.wanted}' not found in npm registry\navailable versions:\n`)
+            spinner.fail(msg+err.versions.reverse().join(' | '));
+            throw err.code;
+        }
+        spinner.fail('Unexpected error');
+        throw new Error(err);
     }
     await fs.copy(tempDir+'/dist', targetDir);
     await fs.remove(tempDir);
