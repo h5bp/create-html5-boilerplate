@@ -23,6 +23,12 @@
     "coverage": "jest --coverage --collectCoverageOnlyFrom ./cli.js",
     "start": "node ./index.js ./out"
   },
+  "files": [
+    "license.txt",
+    "index.js",
+    "cli.js",
+    "README.md"
+  ],
   "dependencies": {
     "chalk": "^4.0.0",
     "elapsed-time-logger": "^1.1.2",
