@@ -3,6 +3,8 @@
 const yargs_parser = require("yargs-parser");
 const path = require("path");
 const chalk = require("chalk");
+const prompts = require("prompts");
+const semver = require("semver");
 const ora = require("ora");
 const { extract } = require("pacote");
 const glob = require("fast-glob");
@@ -11,6 +13,7 @@ const os = require("os");
 const packageName = "html5-boilerplate";
 const tempDir = os.tmpdir() + `/${packageName}-staging`;
 const elapsed = require("elapsed-time-logger");
+let spinner;
 
 module.exports = async () => {
   const argv = yargs_parser(process.argv.slice(2), {
@@ -19,7 +22,7 @@ module.exports = async () => {
   const timer = elapsed.start();
   const version = argv["release"] || "latest";
   const targetDir = path.resolve(argv["_"][0] || "./");
-  const spinner = ora(
+  spinner = ora(
     `Downloading ${packageName} version '${version}' to ${targetDir}`
   ).start();
   await fs.ensureDir(tempDir);
@@ -29,9 +32,13 @@ module.exports = async () => {
       tempDir,
       {}
     );
-    spinner.text = `${nameWithVersion} copied to ${targetDir} in ${timer.get()}. Have fun!`;
+    await fs.copy(tempDir + "/dist", targetDir);
+    await onLoad(targetDir, version);
+    spinner.succeed(
+      `${nameWithVersion} copied to ${targetDir} in ${timer.get()}. Have fun!`
+    );
+    return;
   } catch (err) {
-    await fs.remove(tempDir);
     if (err.code === "ETARGET") {
       const msg = chalk.red(
         `version '${err.wanted}' not found in npm registry\navailable versions:\n`
@@ -41,9 +48,12 @@ module.exports = async () => {
     }
     spinner.fail("Unexpected error");
     throw new Error(err);
+  } finally {
+    await fs.remove(tempDir);
   }
-  await fs.copy(tempDir + "/dist", targetDir);
-  await fs.remove(tempDir);
+};
+
+const onLoad = async (targetDir, version) => {
   // see https://github.com/mrmlnc/fast-glob#how-to-write-patterns-on-windows
   const npmIgnoreFiles = await glob(
     `${targetDir.replace(/\\/g, "/")}/**/.npmignore`
@@ -51,6 +61,36 @@ module.exports = async () => {
   for (const npmIgnore of npmIgnoreFiles) {
     await fs.rename(npmIgnore, npmIgnore.replace(/\.npmignore$/, ".gitignore"));
   }
-  spinner.succeed();
-  return;
+
+  spinner.stop();
+
+  const questions = [
+    {
+      type: "confirm",
+      name: "jquery",
+      message: "Remove jQuery?",
+      initial: true,
+    },
+    // {
+    //   type: 'confirm',
+    //   name: 'docs',
+    //   message: 'Include docs?',
+    // }
+  ];
+
+  const { jquery } = await prompts(questions);
+
+  if (jquery) {
+    try {
+      const indexFile = targetDir + "/index.html";
+      const sourceHTML = await fs.readFile(indexFile, "utf-8");
+      const resultHTML = sourceHTML.replace(
+        /(<script>window\.jQuery.*<\/script>|<script src=".*jquery.*<\/script>)/gi,
+        ""
+      );
+      await fs.writeFile(indexFile, resultHTML);
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
 };
