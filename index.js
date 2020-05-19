@@ -1,1 +1,1 @@
-require('./cli')().catch(console.error);
+require("./cli")().catch(console.error);

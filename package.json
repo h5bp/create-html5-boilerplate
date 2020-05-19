@@ -19,6 +19,7 @@
   },
   "scripts": {
     "test": "jest",
+    "format": "prettier --write \"./cli.js\" \"tests/*.js\"",
     "coverage": "jest --coverage --collectCoverageOnlyFrom ./cli.js",
     "start": "node ./index.js ./out"
   },
@@ -31,6 +32,14 @@
     "yargs-parser": "^18.1.3"
   },
   "devDependencies": {
-    "jest": "^26.0.1"
+    "husky": "^4.2.5",
+    "jest": "^26.0.1",
+    "prettier": "^2.0.5",
+    "pretty-quick": "^2.0.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   }
 }
