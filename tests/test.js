@@ -101,8 +101,16 @@ describe.each(cases)("Downloading %s", (version) => {
       "css",
       "js",
       "img",
+      ".gitignore",
     ].filter((v) => dirContents.indexOf(v) === -1);
     expect(check.length === 0).toBe(true);
+  });
+
+  test("Target directory contains img/.gitignore", async () => {
+    const imgGitIgnore = await fs.exists(
+      versionFolder(version) + "/img/.gitignore"
+    );
+    expect(imgGitIgnore).toBe(true);
   });
 
   test("Temp directory removed", async () => {

@@ -5,6 +5,7 @@ const path = require("path");
 const chalk = require("chalk");
 const ora = require("ora");
 const { extract } = require("pacote");
+const glob = require("fast-glob");
 const fs = require("fs-extra");
 const os = require("os");
 const packageName = "html5-boilerplate";
@@ -43,6 +44,13 @@ module.exports = async () => {
   }
   await fs.copy(tempDir + "/dist", targetDir);
   await fs.remove(tempDir);
+  // see https://github.com/mrmlnc/fast-glob#how-to-write-patterns-on-windows
+  const npmIgnoreFiles = await glob(
+    `${targetDir.replace(/\\/g, "/")}/**/.npmignore`
+  );
+  for (const npmIgnore of npmIgnoreFiles) {
+    await fs.rename(npmIgnore, npmIgnore.replace(/\.npmignore$/, ".gitignore"));
+  }
   spinner.succeed();
   return;
 };
