@@ -2,7 +2,7 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/h5bp/create-html5-boilerplate/badge.svg?branch=master)](https://coveralls.io/github/h5bp/create-html5-boilerplate?branch=master)
 
-Quick start for HTML5 Boilerplate. Get up in running with one command.
+Quick start for HTML5 Boilerplate. Get up and running with one command.
 
 ## Getting Started
 
@@ -14,6 +14,7 @@ Using `npx`
 ```sh
 npx create-html5-boilperlate new-site
 cd new-site
+npm install
 npm start
 ```
 
@@ -22,6 +23,7 @@ Using `npm init`
 ```sh
 npm init create-html5-boilperlate new-site
 cd new-site
+npm install
 npm start
 ```
 
@@ -30,6 +32,7 @@ Using yarn
 ```sh
 yarn create html5-boilperlate new-site
 cd new-site
+npm install
 npm start
 ```
 
@@ -56,5 +59,17 @@ Then you can use create-html5-boilerplate as in the following example
 ```sh
 create-html5-boilperlate new-site
 cd new-site
+npm install
+npm start
+```
+
+## Installing Specific Versions
+
+You can also install a specific version:
+
+```sh
+npx create-html5-boilerplate new-site --release=7.2.0
+cd new-site
+npm install
 npm start
 ```
