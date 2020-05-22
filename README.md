@@ -12,7 +12,7 @@ You can get started using one of three options- `npx`, `npm init`, or
 Using `npx`
 
 ```sh
-npx create-html5-boilperlate new-site
+npx create-html5-boilerplate new-site
 cd new-site
 npm install
 npm start
@@ -21,7 +21,7 @@ npm start
 Using `npm init`
 
 ```sh
-npm init create-html5-boilperlate new-site
+npm init create-html5-boileprlate new-site
 cd new-site
 npm install
 npm start
@@ -32,8 +32,8 @@ Using yarn
 ```sh
 yarn create html5-boilperlate new-site
 cd new-site
-npm install
-npm start
+yarn install
+yarn start
 ```
 
 These commands are equivalent and do the following:
