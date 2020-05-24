@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 "use strict";
 const yargs_parser = require("yargs-parser");
 const path = require("path");
