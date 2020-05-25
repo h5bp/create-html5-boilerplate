@@ -11,7 +11,7 @@ You can get started using one of three options- `npx`, `npm init`, or
 
 Using `npx`
 
-```sh
+```
 npx create-html5-boilerplate new-site
 cd new-site
 npm install
@@ -20,7 +20,7 @@ npm start
 
 Using `npm init`
 
-```sh
+```
 npm init create-html5-boilerplate new-site
 cd new-site
 npm install
@@ -29,7 +29,7 @@ npm start
 
 Using yarn
 
-```sh
+```
 yarn create html5-boilerplate new-site
 cd new-site
 yarn install
@@ -40,7 +40,7 @@ These commands are equivalent and do the following:
 
 1. Dowload and install the latest version of HTML5 Boilerplate
 2. Installs dependencies
-3. Bundles site assets and tart a web server using [`parcel`](https://parceljs.org/)
+3. Bundles site assets and start a web server using [parcel](https://parceljs.org/)
 4. Opens a web browser pointed to http://localhost:1234/
 
 ## Requirements
@@ -51,13 +51,13 @@ The only requirements are for `npx`, which requires npm version 5.2 or greater a
 older version of npm you can still use `create-html5-boilerplate` by running the 
 following command to install the project globally.
 
-```sh
+```
 npm install -g create-html5-boilerplate
 ```
 
 Then you can use `create-html5-boilerplate` as in the following example
 
-```sh
+```
 create-html5-boilerplate new-site
 cd new-site
 npm install
@@ -68,7 +68,7 @@ npm start
 
 You can also install a specific version:
 
-```sh
+```
 npx create-html5-boilerplate new-site --release=7.2.0
 cd new-site
 npm install
