@@ -1,7 +1,7 @@
 {
   "name": "create-html5-boilerplate",
   "version": "0.1.0",
-  "description": "",
+  "description": "An npm based quickstart app for HTML5-Boilerplate",
   "keywords": [],
   "homepage": "https://html5boilerplate.com/",
   "bugs": {
