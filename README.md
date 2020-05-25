@@ -21,7 +21,7 @@ npm start
 Using `npm init`
 
 ```sh
-npm init create-html5-boileprlate new-site
+npm init create-html5-boilerplate new-site
 cd new-site
 npm install
 npm start
@@ -30,7 +30,7 @@ npm start
 Using yarn
 
 ```sh
-yarn create html5-boilperlate new-site
+yarn create html5-boilerplate new-site
 cd new-site
 yarn install
 yarn start
@@ -38,9 +38,10 @@ yarn start
 
 These commands are equivalent and do the following:
 
-1. Dowloads and installs the latest version of HTML5-Boilerplate
-2. Bundles site assets and tart a web server using [`parcel`](https://parceljs.org/)
-3. Opens a web browser pointed to http://localhost:1234/
+1. Dowload and install the latest version of HTML5 Boilerplate
+2. Installs dependencies
+3. Bundles site assets and tart a web server using [`parcel`](https://parceljs.org/)
+4. Opens a web browser pointed to http://localhost:1234/
 
 ## Requirements
 
@@ -51,13 +52,13 @@ older version of npm you can still use `create-html5-boilerplate` by running the
 following command to install the project globally.
 
 ```sh
-npm install -g create-html5-boilperlate
+npm install -g create-html5-boilerplate
 ```
 
-Then you can use create-html5-boilerplate as in the following example
+Then you can use `create-html5-boilerplate` as in the following example
 
 ```sh
-create-html5-boilperlate new-site
+create-html5-boilerplate new-site
 cd new-site
 npm install
 npm start
