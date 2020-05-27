@@ -38,14 +38,14 @@ yarn start
 
 These commands are equivalent and do the following:
 
-1. Dowload and install the latest version of HTML5 Boilerplate
+1. Download and install the latest version of HTML5 Boilerplate
 2. Installs dependencies
-3. Bundles site assets and start a web server using [parcel](https://parceljs.org/)
+3. Bundles site assets and start a web server using [Parcel](https://parceljs.org/)
 4. Opens a web browser pointed to http://localhost:1234/
 
 ## Requirements
 
-`create-html5-boilerplate` is cross-platform. It works whereever node and npm work.
+`create-html5-boilerplate` is cross-platform. It works wherever node and npm work.
 The only requirements are for `npx`, which requires npm version 5.2 or greater and
 `npm init` which requires an npm version greater than 6.0. If you're stuck on an
 older version of npm you can still use `create-html5-boilerplate` by running the 
