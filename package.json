@@ -24,9 +24,9 @@
     "start": "node ./index.js ./out"
   },
   "files": [
+    "lib/**/*",
     "license.txt",
     "index.js",
-    "cli.js",
     "README.md"
   ],
   "dependencies": {
