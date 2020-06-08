@@ -34,28 +34,32 @@ const cases = [
 const versionFolder = (version = null) =>
   version ? `./out/${version}` : defaultDir;
 
-const runCli = async (version = null) => {
+const runCli = async ({ version = null, dir = null, skip = false }) => {
+  let argvs = [];
   let prevCwd;
-  if (version) {
-    process.argv.push(version);
-    process.argv.push(versionFolder(version));
+  if (dir) {
+    argvs.push(dir);
   } else {
     await fs.ensureDir(defaultDir);
     prevCwd = process.cwd();
     process.chdir(defaultDir);
   }
-  await cli();
+
   if (version) {
-    process.argv = process.argv.filter(
-      (v) => v !== version && v !== versionFolder(version)
-    ); //revert process args
-  } else {
+    argvs.push(version);
+  }
+  if (skip) {
+    argvs.push("-y");
+  }
+
+  await cli(argvs);
+  if (prevCwd) {
     process.chdir(prevCwd); //revert process current dir
   }
 };
 describe.each(cases)("Downloading %s", (version) => {
   beforeAll(async () => {
-    await runCli(version);
+    await runCli({ version: version, dir: versionFolder(version), skip: true });
   });
   afterAll(async () => {
     await fs.remove(versionFolder(version));
@@ -124,7 +128,11 @@ describe("Errors", () => {
     //maybe create test.each() for more errors scenarios
     const version = "-r=6..2.3";
     try {
-      await runCli(version);
+      await runCli({
+        version: version,
+        dir: versionFolder(version),
+        skip: true,
+      });
     } catch (err) {
       expect(err).toBe("ETARGET");
     } finally {
@@ -138,7 +146,11 @@ describe("Unexpected errors", () => {
     //maybe create test.each() for more errors scenarios
     const version = "-r=6..2.3,7.2.3";
     try {
-      await runCli(version);
+      await runCli({
+        version: version,
+        dir: versionFolder(version),
+        skip: true,
+      });
     } catch (err) {
       expect(err).not.toBe("ETARGET");
     } finally {
