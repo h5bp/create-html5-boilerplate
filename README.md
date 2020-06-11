@@ -48,7 +48,7 @@ These commands are equivalent and do the following:
 `create-html5-boilerplate` is cross-platform. It works wherever node and npm work.
 The only requirements are for `npx`, which requires npm version 5.2 or greater and
 `npm init` which requires an npm version greater than 6.0. If you're stuck on an
-older version of npm you can still use `create-html5-boilerplate` by running the 
+older version of npm you can still use `create-html5-boilerplate` by running the
 following command to install the project globally.
 
 ```
@@ -74,3 +74,32 @@ cd new-site
 npm install
 npm start
 ```
+
+## CONTRIBUTING
+
+### Setting Up a Local Copy
+
+1. Clone the repo with `git clone https://github.com/h5bp/create-html5-boilerplate.git`
+2. Run `npm install` in the root `create-html5-boilerplate` folder.
+3. run `npm link` to make npm run local copy instead of downloading from registry
+4. now you can use `npm init html5-boilerplate` and `npx create-html5-boilerplate`
+
+note: you can use `npx create-html5-boilerplate ./out/example` from `create-html5-boilerplate` without running `npm link`
+also its possible to run directly NodeJS entry point `node index.js ./out/example` or `npm start`
+`./out` is git ignored folder, so you should use this folder for tests.
+
+If you want to try out the end-to-end flow with the global CLI, you can do this too:
+
+```
+npx create-html5-boilerplate ./out/new-site
+cd new-site
+npm install
+npm start
+```
+
+### Tests
+
+Tests are written using [jest](https://jestjs.io/) and located in `tests/test.js`
+run `npm test`
+
+run coverage reports `npm run coverage`
