@@ -34,7 +34,12 @@ const cases = [
 const versionFolder = (version = null) =>
   version ? `./out/${version}` : defaultDir;
 
-const runCli = async ({ version = null, dir = null, skip = false }) => {
+const runCli = async ({
+  version = null,
+  dir = null,
+  skip = false,
+  lang = null,
+}) => {
   let argvs = [];
   let prevCwd;
   if (dir) {
@@ -50,6 +55,9 @@ const runCli = async ({ version = null, dir = null, skip = false }) => {
   }
   if (skip) {
     argvs.push("-y");
+  }
+  if (lang) {
+    argvs.push("--lang=" + lang);
   }
 
   await cli(argvs);
@@ -156,5 +164,17 @@ describe("Unexpected errors", () => {
     } finally {
       await fs.remove(versionFolder(version));
     }
+  });
+});
+
+describe("lang", () => {
+  test("lang", async () => {
+    await runCli({
+      lang: "en-US",
+      dir: "./out/lang_en-US",
+    });
+    const fileContent = await fs.readFile("./out/lang_en-US/index.html");
+    expect(fileContent.indexOf(`lang="en-US"`) > -1).toBe(true);
+    // await fs.remove(versionFolder(version));
   });
 });
