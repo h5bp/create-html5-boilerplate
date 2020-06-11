@@ -31,8 +31,8 @@ const cases = [
   "--release=7.3.0",
   ...all_versions.map((v) => "-r=" + v),
 ];
-const versionFolder = (version = null) =>
-  version ? `./out/${version}` : defaultDir;
+
+const outputFolder = (version = null) => "./out/" + (version || "default_dir");
 
 const runCli = async ({
   version = null,
@@ -43,7 +43,7 @@ const runCli = async ({
   let argvs = [];
   let prevCwd;
   if (dir) {
-    argvs.push(dir);
+    argvs.push("./out/" + dir);
   } else {
     await fs.ensureDir(defaultDir);
     prevCwd = process.cwd();
@@ -67,10 +67,10 @@ const runCli = async ({
 };
 describe.each(cases)("Downloading %s", (version) => {
   beforeAll(async () => {
-    await runCli({ version: version, dir: versionFolder(version), skip: true });
+    await runCli({ version: version, dir: version, skip: true });
   });
   afterAll(async () => {
-    await fs.remove(versionFolder(version));
+    await fs.remove(outputFolder(version));
   });
 
   if (version && version != "-r=latest") {
@@ -95,17 +95,17 @@ describe.each(cases)("Downloading %s", (version) => {
   }
 
   test("Target directory exists", async () => {
-    const outDirExists = await fs.exists(versionFolder(version));
+    const outDirExists = await fs.exists(outputFolder(version));
     expect(outDirExists).toBe(true);
   });
 
   test("Target directory have files", async () => {
-    const dirContents = await fs.readdir(versionFolder(version));
+    const dirContents = await fs.readdir(outputFolder(version));
     expect(dirContents.length).toBeGreaterThanOrEqual(7);
   });
 
   test("Target directory contains specific files", async () => {
-    const dirContents = await fs.readdir(versionFolder(version));
+    const dirContents = await fs.readdir(outputFolder(version));
     const check = [
       "index.html",
       "robots.txt",
@@ -120,7 +120,7 @@ describe.each(cases)("Downloading %s", (version) => {
 
   test("Target directory contains img/.gitignore", async () => {
     const imgGitIgnore = await fs.exists(
-      versionFolder(version) + "/img/.gitignore"
+      outputFolder(version) + "/img/.gitignore"
     );
     expect(imgGitIgnore).toBe(true);
   });
@@ -138,13 +138,13 @@ describe("Errors", () => {
     try {
       await runCli({
         version: version,
-        dir: versionFolder(version),
+        dir: version,
         skip: true,
       });
     } catch (err) {
       expect(err).toBe("ETARGET");
     } finally {
-      await fs.remove(versionFolder(version));
+      await fs.remove(outputFolder(version));
     }
   });
 });
@@ -156,25 +156,26 @@ describe("Unexpected errors", () => {
     try {
       await runCli({
         version: version,
-        dir: versionFolder(version),
+        dir: version,
         skip: true,
       });
     } catch (err) {
       expect(err).not.toBe("ETARGET");
     } finally {
-      await fs.remove(versionFolder(version));
+      await fs.remove(outputFolder(version));
     }
   });
 });
 
 describe("lang", () => {
   test("lang", async () => {
+    const lang = "en-US";
     await runCli({
       lang: "en-US",
-      dir: "./out/lang_en-US",
+      dir: `lang_${lang}`,
     });
     const fileContent = await fs.readFile("./out/lang_en-US/index.html");
-    expect(fileContent.indexOf(`lang="en-US"`) > -1).toBe(true);
-    // await fs.remove(versionFolder(version));
+    expect(fileContent.indexOf(`lang="${lang}"`) > -1).toBe(true);
+    await fs.remove(`./out/lang_${lang}`);
   });
 });
