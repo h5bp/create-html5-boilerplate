@@ -81,8 +81,8 @@ npm start
 
 1. Clone the repo with `git clone https://github.com/h5bp/create-html5-boilerplate.git`
 2. Run `npm install` in the root `create-html5-boilerplate` folder.
-3. run `npm link` to make npm run local copy instead of downloading from registry
-4. now you can use `npm init html5-boilerplate` and `npx create-html5-boilerplate`
+3. Run `npm link` to make npm run local copy instead of downloading from registry
+4. Now you can use `npm init html5-boilerplate` and `npx create-html5-boilerplate`
 
 note: you can use `npx create-html5-boilerplate ./out/example` from `create-html5-boilerplate` without running `npm link`
 also its possible to run directly NodeJS entry point `node index.js ./out/example` or `npm start`
