@@ -20,7 +20,7 @@
   "scripts": {
     "test": "jest",
     "format": "prettier --write \"./cli.js\" \"tests/*.js\"",
-    "coverage": "NODE_ENV=test jest --coverage --collectCoverageOnlyFrom ./lib/cli.js",
+    "coverage": "jest --coverage --collectCoverageOnlyFrom ./lib/cli.js",
     "start": "node ./index.js ./out"
   },
   "files": [
