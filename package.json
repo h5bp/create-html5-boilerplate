@@ -20,13 +20,12 @@
   "scripts": {
     "test": "jest",
     "format": "prettier --write \"./cli.js\" \"tests/*.js\"",
-    "coverage": "jest --coverage --collectCoverageOnlyFrom ./cli.js",
-    "start": "node ./index.js ./out/example"
+    "coverage": "jest --coverage --collectCoverageOnlyFrom ./lib/cli.js"
   },
   "files": [
+    "lib/**/*",
     "license.txt",
     "index.js",
-    "cli.js",
     "README.md"
   ],
   "dependencies": {
@@ -34,8 +33,11 @@
     "elapsed-time-logger": "^1.1.2",
     "fast-glob": "^3.2.2",
     "fs-extra": "^9.0.0",
+    "fuzzy": "^0.1.3",
     "ora": "^4.0.4",
     "pacote": "^11.1.10",
+    "prompts": "^2.3.2",
+    "semver": "^7.3.2",
     "yargs-parser": "^18.1.3"
   },
   "devDependencies": {

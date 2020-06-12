@@ -1,5 +1,5 @@
 const fs = require("fs-extra");
-const cli = require("../cli");
+const cli = require("../lib/cli");
 const os = require("os");
 const packageName = "html5-boilerplate";
 const tempDir = os.tmpdir() + `/${packageName}-staging`;
@@ -31,34 +31,46 @@ const cases = [
   "--release=7.3.0",
   ...all_versions.map((v) => "-r=" + v),
 ];
-const versionFolder = (version = null) =>
-  version ? `./out/${version}` : defaultDir;
 
-const runCli = async (version = null) => {
+const outputFolder = (version = null) => "./out/" + (version || "default_dir");
+
+const runCli = async ({
+  version = null,
+  dir = null,
+  skip = false,
+  lang = null,
+}) => {
+  let argvs = [];
   let prevCwd;
-  if (version) {
-    process.argv.push(version);
-    process.argv.push(versionFolder(version));
+  if (dir) {
+    argvs.push("./out/" + dir);
   } else {
     await fs.ensureDir(defaultDir);
     prevCwd = process.cwd();
     process.chdir(defaultDir);
   }
-  await cli();
+
   if (version) {
-    process.argv = process.argv.filter(
-      (v) => v !== version && v !== versionFolder(version)
-    ); //revert process args
-  } else {
+    argvs.push(version);
+  }
+  if (skip) {
+    argvs.push("-y");
+  }
+  if (lang) {
+    argvs.push("--lang=" + lang);
+  }
+
+  await cli(argvs);
+  if (prevCwd) {
     process.chdir(prevCwd); //revert process current dir
   }
 };
 describe.each(cases)("Downloading %s", (version) => {
   beforeAll(async () => {
-    await runCli(version);
+    await runCli({ version: version, dir: version, skip: true });
   });
   afterAll(async () => {
-    await fs.remove(versionFolder(version));
+    await fs.remove(outputFolder(version));
   });
 
   if (version && version != "-r=latest") {
@@ -83,17 +95,17 @@ describe.each(cases)("Downloading %s", (version) => {
   }
 
   test("Target directory exists", async () => {
-    const outDirExists = await fs.exists(versionFolder(version));
+    const outDirExists = await fs.exists(outputFolder(version));
     expect(outDirExists).toBe(true);
   });
 
   test("Target directory have files", async () => {
-    const dirContents = await fs.readdir(versionFolder(version));
+    const dirContents = await fs.readdir(outputFolder(version));
     expect(dirContents.length).toBeGreaterThanOrEqual(7);
   });
 
   test("Target directory contains specific files", async () => {
-    const dirContents = await fs.readdir(versionFolder(version));
+    const dirContents = await fs.readdir(outputFolder(version));
     const check = [
       "index.html",
       "robots.txt",
@@ -108,7 +120,7 @@ describe.each(cases)("Downloading %s", (version) => {
 
   test("Target directory contains img/.gitignore", async () => {
     const imgGitIgnore = await fs.exists(
-      versionFolder(version) + "/img/.gitignore"
+      outputFolder(version) + "/img/.gitignore"
     );
     expect(imgGitIgnore).toBe(true);
   });
@@ -124,11 +136,15 @@ describe("Errors", () => {
     //maybe create test.each() for more errors scenarios
     const version = "-r=6..2.3";
     try {
-      await runCli(version);
+      await runCli({
+        version: version,
+        dir: version,
+        skip: true,
+      });
     } catch (err) {
       expect(err).toBe("ETARGET");
     } finally {
-      await fs.remove(versionFolder(version));
+      await fs.remove(outputFolder(version));
     }
   });
 });
@@ -138,11 +154,28 @@ describe("Unexpected errors", () => {
     //maybe create test.each() for more errors scenarios
     const version = "-r=6..2.3,7.2.3";
     try {
-      await runCli(version);
+      await runCli({
+        version: version,
+        dir: version,
+        skip: true,
+      });
     } catch (err) {
       expect(err).not.toBe("ETARGET");
     } finally {
-      await fs.remove(versionFolder(version));
+      await fs.remove(outputFolder(version));
     }
+  });
+});
+
+describe("lang", () => {
+  test("lang", async () => {
+    const lang = "en-US";
+    await runCli({
+      lang: "en-US",
+      dir: `lang_${lang}`,
+    });
+    const fileContent = await fs.readFile("./out/lang_en-US/index.html");
+    expect(fileContent.indexOf(`lang="${lang}"`) > -1).toBe(true);
+    await fs.remove(`./out/lang_${lang}`);
   });
 });
