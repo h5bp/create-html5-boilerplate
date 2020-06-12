@@ -21,7 +21,7 @@
     "test": "jest",
     "format": "prettier --write \"./cli.js\" \"tests/*.js\"",
     "coverage": "jest --coverage --collectCoverageOnlyFrom ./cli.js",
-    "start": "node ./index.js ./out"
+    "start": "node ./index.js ./out/example"
   },
   "files": [
     "license.txt",
