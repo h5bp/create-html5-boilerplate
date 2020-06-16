@@ -74,3 +74,32 @@ cd new-site
 npm install
 npm start
 ```
+
+## CONTRIBUTING
+
+### Setting Up a Local Copy
+
+1. Clone the repo with `git clone https://github.com/h5bp/create-html5-boilerplate.git`
+2. Run `npm install` in the root `create-html5-boilerplate` folder.
+3. Run `npm link` to make npm run local copy instead of downloading from registry
+4. Now you can use `npm init html5-boilerplate` and `npx create-html5-boilerplate`
+
+note: you can use `npx create-html5-boilerplate ./out/example` from `create-html5-boilerplate` without running `npm link`
+also its possible to run directly NodeJS entry point `node index.js ./out/example` or `npm start`
+`./out` is git ignored folder, so you should use this folder for tests.
+
+If you want to try out the end-to-end flow with the global CLI, you can do this too:
+
+```
+npx create-html5-boilerplate ./out/new-site
+cd new-site
+npm install
+npm start
+```
+
+### Tests
+
+Tests are written using [jest](https://jestjs.io/) and located in `tests/test.js`
+run `npm test`
+
+run coverage reports `npm run coverage`
