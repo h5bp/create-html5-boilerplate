@@ -21,7 +21,7 @@ npm start
 Using `npm init`
 
 ```
-npm init create-html5-boilerplate new-site
+npm init html5-boilerplate new-site
 cd new-site
 npm install
 npm start
