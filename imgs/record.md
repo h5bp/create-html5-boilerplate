@@ -1,1 +1,0 @@
-https://terminalizer.com/docs
