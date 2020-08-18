@@ -29,16 +29,16 @@
     "README.md"
   ],
   "dependencies": {
-    "chalk": "^4.0.0",
+    "chalk": "^4.1.0",
+    "compare-versions": "^3.6.0",
     "elapsed-time-logger": "^1.1.2",
-    "fast-glob": "^3.2.2",
-    "fs-extra": "^9.0.0",
+    "fast-glob": "^3.2.4",
+    "fs-extra": "^9.0.1",
     "fuzzy": "^0.1.3",
-    "ora": "^4.0.4",
+    "ora": "^5.0.0",
     "pacote": "^11.1.10",
     "prompts": "^2.3.2",
-    "semver": "^7.3.2",
-    "yargs-parser": "^18.1.3"
+    "yargs-parser": "^19.0.1"
   },
   "devDependencies": {
     "husky": "^4.2.5",
