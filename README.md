@@ -8,7 +8,7 @@ Quick start for HTML5 Boilerplate. Get up and running with one command.
 
 You can get started using one of three options- `npx`, `npm init`, or
 `yarn create`
-
+<img src="img/render1591958322106.gif">
 Using `npx`
 
 ```

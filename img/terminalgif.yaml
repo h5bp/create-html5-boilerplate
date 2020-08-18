@@ -1,0 +1,374 @@
+# The configurations that used for the recording, feel free to edit them
+config:
+  # Specify a command to be executed
+  # like `/bin/bash -l`, `ls`, or any other commands
+  # the default is bash for Linux
+  # or powershell.exe for Windows
+  command: powershell.exe
+
+  # Specify the current working directory path
+  # the default is the current working directory path
+  cwd: D:\projects
+
+  # Export additional ENV variables
+  env:
+    recording: true
+
+  # Explicitly set the number of columns
+  # or use `auto` to take the current
+  # number of columns of your shell
+  cols: 134
+
+  # Explicitly set the number of rows
+  # or use `auto` to take the current
+  # number of rows of your shell
+  rows: 15
+
+  # Amount of times to repeat GIF
+  # If value is -1, play once
+  # If value is 0, loop indefinitely
+  # If value is a positive number, loop n times
+  repeat: 0
+
+  # Quality
+  # 1 - 100
+  quality: 100
+
+  # Delay between frames in ms
+  # If the value is `auto` use the actual recording delays
+  frameDelay: auto
+
+  # Maximum delay between frames in ms
+  # Ignored if the `frameDelay` isn't set to `auto`
+  # Set to `auto` to prevent limiting the max idle time
+  maxIdleTime: 2000
+
+  # The surrounding frame box
+  # The `type` can be null, window, floating, or solid`
+  # To hide the title use the value null
+  # Don't forget to add a backgroundColor style with a null as type
+  frameBox:
+    type: floating
+    title: Terminalizer
+    style:
+      border: 0px black solid
+      # boxShadow: none
+      # margin: 0px
+
+  # Add a watermark image to the rendered gif
+  # You need to specify an absolute path for
+  # the image on your machine or a URL, and you can also
+  # add your own CSS styles
+  watermark:
+    imagePath: null
+    style:
+      position: absolute
+      right: 15px
+      bottom: 15px
+      width: 100px
+      opacity: 0.9
+
+  # Cursor style can be one of
+  # `block`, `underline`, or `bar`
+  cursorStyle: block
+
+  # Font family
+  # You can use any font that is installed on your machine
+  # in CSS-like syntax
+  fontFamily: "Monaco, Lucida Console, Ubuntu Mono, Monospace"
+
+  # The size of the font
+  fontSize: 12
+
+  # The height of lines
+  lineHeight: 1
+
+  # The spacing between letters
+  letterSpacing: 0
+
+  # Theme
+  theme:
+    background: "transparent"
+    foreground: "#afafaf"
+    cursor: "#c7c7c7"
+    black: "#232628"
+    red: "#fc4384"
+    green: "#b3e33b"
+    yellow: "#ffa727"
+    blue: "#75dff2"
+    magenta: "#ae89fe"
+    cyan: "#708387"
+    white: "#d5d5d0"
+    brightBlack: "#626566"
+    brightRed: "#ff7fac"
+    brightGreen: "#c8ed71"
+    brightYellow: "#ebdf86"
+    brightBlue: "#75dff2"
+    brightMagenta: "#ae89fe"
+    brightCyan: "#b1c6ca"
+    brightWhite: "#f9f9f4"
+
+# Records, feel free to edit them
+records:
+  - delay: 615
+    content: "\e[2J\e[?25l\e[m\e[H\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\e[H\e]0;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\a\e[?25h"
+  - delay: 8
+    content: "\e[?25lWindows PowerShell\e[42X\e[42C\r\nCopyright (C) Microsoft Corporation. All rights reserved.   \r\n\e[60X\e[60C\r\nTry the new cross-platform PowerShell https://aka.ms/pscore6\e[6;1H\e[?25h"
+  - delay: 50
+    content: "\e[?25lPS D:\\projects> \e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[93mn"
+  - delay: 40
+    content: "\e[?25l\e[m\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\bnp\e[?25h"
+  - delay: 98
+    content: "\e[?25l\e[m\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[?25h"
+  - delay: 96
+    content: "\e[?25l\e[m\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m \b\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m \e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m c\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m cr\e[?25h"
+  - delay: 81
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m cre\e[?25h"
+  - delay: 16
+    content: "\e[?25l\e[?25h"
+  - delay: 8
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m crea\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m creat\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create\e[?25h"
+  - delay: 83
+    content: "\e[?25l\e[?25h"
+  - delay: 10
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 10
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-h\e[?25h"
+  - delay: 46
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-ht\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 10
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-htm\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-b\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-bo\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boi\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boil\e[?25h"
+  - delay: 67
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boile\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boiler\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerp\e[?25h"
+  - delay: 115
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerpl\e[?25h"
+  - delay: 55
+    content: "\e[?25l\e[?25h"
+  - delay: 8
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerpla\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerplat\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 8
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerplate\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerplate \e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 10
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerplate .\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerplate ./\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 10
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerplate ./n\e[?25h"
+  - delay: 44
+    content: "\e[?25l\e[?25h"
+  - delay: 10
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerplate ./ne\e[?25h"
+  - delay: 56
+    content: "\e[?25l\e[?25h"
+  - delay: 10
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerplate ./new\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerplate ./new-\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerplate ./new-s\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerplate ./new-si\e[?25h"
+  - delay: 91
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerplate ./new-sit\e[?25h"
+  - delay: 50
+    content: "\e[?25l\e[?25h"
+  - delay: 8
+    content: "\e[?25l\e[93m\e[6;17Hnpx\e[m create-html5-boilerplate ./new-site\e[?25h"
+  - delay: 600
+    content: "\e[?25l\r\n\e[?25h"
+  - delay: 21
+    content: "\e[?25l\e[HWindows PowerShell\e[116X\e[116C\r\nCopyright (C) Microsoft Corporation. All rights reserved.\e[77X\e[77C\r\n\e[134X\e[134C\r\nTry the new cross-platform PowerShell https://aka.ms/pscore6\e[74X\e[74C\r\n\e[134X\e[134C\r\nPS D:\\projects> \e[93mnpx\e[m create-html5-boilerplate ./new-site\e[79X\e[79C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\e[7;1H\e[?25h"
+  - delay: 10
+    content: "\e[?25l\e[HWindows PowerShell\e[116X\e[116C\r\nCopyright (C) Microsoft Corporation. All rights reserved.\e[77X\e[77C\r\n\e[134X\e[134C\r\nTry the new cross-platform PowerShell https://aka.ms/pscore6\e[74X\e[74C\r\n\e[134X\e[134C\r\nPS D:\\projects> \e[93mnpx\e[m create-html5-boilerplate ./new-site\e[79X\e[79C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\e[7;1H\e[?25h"
+  - delay: 59
+    content: "\e[?25l\e]0;npm\a\e[?25h"
+  - delay: 100
+    content: "\e[?25l\e[HWindows PowerShell\e[116X\e[116C\r\nCopyright (C) Microsoft Corporation. All rights reserved.\e[77X\e[77C\r\n\e[134X\e[134C\r\nTry the new cross-platform PowerShell https://aka.ms/pscore6\e[74X\e[74C\r\n\e[134X\e[134C\r\nPS D:\\projects> \e[93mnpx\e[m create-html5-boilerplate ./new-site\e[79X\e[79C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\e[7;1H\e[?25h"
+  - delay: 181
+    content: "\e[?25l\e[HWindows PowerShell\e[116X\e[116C\r\nCopyright (C) Microsoft Corporation. All rights reserved.\e[77X\e[77C\r\n\e[134X\e[134C\r\nTry the new cross-platform PowerShell https://aka.ms/pscore6\e[74X\e[74C\r\n\e[134X\e[134C\r\nPS D:\\projects> \e[93mnpx\e[m create-html5-boilerplate ./new-site\e[79X\e[79C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\e[7;1H\e[?25h"
+  - delay: 17
+    content: "\e[?25l\e[HWindows PowerShell\e[116X\e[116C\r\nCopyright (C) Microsoft Corporation. All rights reserved.\e[77X\e[77C\r\n\e[134X\e[134C\r\nTry the new cross-platform PowerShell https://aka.ms/pscore6\e[74X\e[74C\r\n\e[134X\e[134C\r\nPS D:\\projects> \e[93mnpx\e[m create-html5-boilerplate ./new-site\e[79X\e[79C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\e[7;1H\e[?25h"
+  - delay: 99
+    content: "\e[?25l\e[HWindows PowerShell\e[116X\e[116C\r\nCopyright (C) Microsoft Corporation. All rights reserved.\e[77X\e[77C\r\n\e[134X\e[134C\r\nTry the new cross-platform PowerShell https://aka.ms/pscore6\e[74X\e[74C\r\n\e[134X\e[134C\r\nPS D:\\projects> \e[93mnpx\e[m create-html5-boilerplate ./new-site\e[79X\e[79C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\e[7;1H\e[?25h"
+  - delay: 197
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[36m-\e[m Downloading html5-boilerplate version 'latest' to D:\\projects\\new-site\e[?25h"
+  - delay: 126
+    content: "\e[?25l\r\e[134X\e[134C\e[?25h"
+  - delay: 8
+    content: "\e[?25l\e[36m\r\\\e[m Downloading html5-boilerplate version 'latest' to D:\\projects\\new-site\e[?25h"
+  - delay: 121
+    content: "\e[?25l\r\e[134X\e[134C\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[36m\r|\e[m Downloading html5-boilerplate version 'latest' to D:\\projects\\new-site\e[?25h"
+  - delay: 121
+    content: "\e[?25l\r\e[134X\e[134C\e[?25h"
+  - delay: 8
+    content: "\e[?25l\e[36m\r/\e[m Downloading html5-boilerplate version 'latest' to D:\\projects\\new-site\e[?25h"
+  - delay: 122
+    content: "\e[?25l\r\e[134X\e[134C\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[36m\r-\e[m Downloading html5-boilerplate version 'latest' to D:\\projects\\new-site\e[?25h"
+  - delay: 123
+    content: "\e[?25l\r\e[134X\e[134C\e[?25h"
+  - delay: 8
+    content: "\e[?25l\e[36m\r\\\e[m Downloading html5-boilerplate version 'latest' to D:\\projects\\new-site\e[?25h"
+  - delay: 121
+    content: "\e[?25l\r\e[134X\e[134C\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[36m\r|\e[m Downloading html5-boilerplate version 'latest' to D:\\projects\\new-site\e[?25h"
+  - delay: 122
+    content: "\e[?25l\r\e[134X\e[134C\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[36m\r/\e[m Downloading html5-boilerplate version 'latest' to D:\\projects\\new-site\e[?25h"
+  - delay: 121
+    content: "\e[?25l\r\e[134X\e[134C\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[36m\r-\e[m Downloading html5-boilerplate version 'latest' to D:\\projects\\new-site\e[?25h"
+  - delay: 121
+    content: "\e[?25l\r\e[134X\e[134C\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[36m\r\\\e[m Downloading html5-boilerplate version 'latest' to D:\\projects\\new-site\e[?25h"
+  - delay: 122
+    content: "\e[?25l\r\e[134X\e[134C\e[?25h"
+  - delay: 8
+    content: "\e[?25l\e[36m\r|\e[m Downloading html5-boilerplate version 'latest' to D:\\projects\\new-site\e[?25h"
+  - delay: 123
+    content: "\e[?25l\r\e[134X\e[134C\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[36m\r/\e[m Downloading html5-boilerplate version 'latest' to D:\\projects\\new-site\e[?25h"
+  - delay: 71
+    content: "\e[?25l\r\e[134X\e[134C\e[?25h"
+  - delay: 6
+    content: "\e[?25l\e[36m\r?\e[m \e[1m\e[97mSelect language\e[m \e[90m»\e[m\e[115X\e[115C\e[36m\r\n>\e[m   \e[4m\e[36mEnglish (en)\e[24m\e[m\e[118X\e[118C\r\n    Enter custom\e[118X\e[118C\r\n    Abkhaz (ab)\e[119X\e[119C\r\n    Afar (aa)\e[121X\e[121C\r\n    Afrikaans (af)\e[116X\e[116C\r\n    Akan (ak)\e[121X\e[121C\r\n    Albanian (sq)\e[117X\e[117C\r\n    Amharic (am)\e[118X\e[118C\e[?25h\e[?25l\r\n    Arabic (ar)\e[119X\e[119C\e[?25h\e[?25l\r\n  ↓ Aragonese (an)\e[116X\e[116C\e[?25h"
+  - delay: 400
+    content: "\e[?25l\e[5;1H\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[36m\e[5;1H?\e[m \e[1m\e[97mSelect language\e[m \e[90m»\e[m e\e[113X\e[113C\e[36m\r\n>\e[m   \e[4m\e[36mEnglish (en)\e[24m\e[m\e[118X\e[118C\r\n    Enter custom\e[118X\e[118C\r\n    Aragonese (an)\e[116X\e[116C\r\n    Armenian (hy)\e[117X\e[117C\r\n    Assamese (as)\e[117X\e[117C\r\n    Avestan (ae)\e[118X\e[118C\r\n    Azerbaijani (az)\e[114X\e[114C\r\n    Basque (eu)\e[119X\e[119C\r\n    Belarusian (be)\e[115X\e[115C\r\n  ↓ Bengali; Bangla (bn)\e[110X\e[110C\e[?25h"
+  - delay: 98
+    content: "\e[?25l\e[5;1H\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\e[?25h"
+  - delay: 10
+    content: "\e[?25l\e[36m\e[5;1H?\e[m \e[1m\e[97mSelect language\e[m \e[90m»\e[m en\e[112X\e[112C\e[36m\r\n>\e[m   \e[4m\e[36mEnglish (en)\e[24m\e[m\e[118X\e[118C\r\n    Enter custom\e[118X\e[118C\r\n    Armenian (hy)\e[117X\e[117C\r\n    Bengali; Bangla (bn)\e[110X\e[110C\r\n    Catalan; Valencian (ca)\e[107X\e[107C\r\n    French (fr)\e[119X\e[119C\r\n    Slovene (sl)\e[118X\e[118C\r\n    Turkmen (tk)\e[118X\e[118C\r\n    Venda (ve)\e[120X\e[120C\r\n  ↓ Aragonese (an)\e[116X\e[116C\e[?25h"
+  - delay: 200
+    content: "\e[?25l\e[5;1H\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\e[?25h"
+  - delay: 8
+    content: "\e[?25l\e[36m\e[5;1H?\e[m \e[1m\e[97mSelect language\e[m \e[90m»\e[m eng\e[111X\e[111C\e[36m\r\n>\e[m   \e[4m\e[36mEnglish (en)\e[24m\e[m\e[118X\e[118C\r\n    Bengali; Bangla (bn)\e[110X\e[110C\r\n    Interlingua (ia)\e[114X\e[114C\r\n    Interlingue (ie)\e[114X\e[114C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\e[?25h"
+  - delay: 300
+    content: "\e[?25l\e[5;1H\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[32m\e[5;1H√\e[m \e[1m\e[97mSelect language\e[m \e[90m»\e[m English (en)\e[102X\e[102C\e[32m\r\n√\e[m html5-boilerplate@latest copied to D:\\projects\\new-site in 1.51 seconds . Have fun!\e[49X\e[49C\r\n\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[?25h"
+  - delay: 9
+    content: "\e[?25l\e[H\e[134X\e[134C\r\nTry the new cross-platform PowerShell https://aka.ms/pscore6\e[74X\e[74C\r\n\e[134X\e[134C\r\nPS D:\\projects> \e[93mnpx\e[m create-html5-boilerplate ./new-site\e[79X\e[79C\e[32m\r\n√\e[m \e[1m\e[97mSelect language\e[m \e[90m»\e[m English (en)\e[102X\e[102C\e[32m\r\n√\e[m html5-boilerplate@latest copied to D:\\projects\\new-site in 1.51 seconds . Have fun!\e[49X\e[49C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\e[7;1H\e[?25h"
+  - delay: 10
+    content: "\e[?25l\e[H\e[134X\e[134C\r\nTry the new cross-platform PowerShell https://aka.ms/pscore6\e[74X\e[74C\r\n\e[134X\e[134C\r\nPS D:\\projects> \e[93mnpx\e[m create-html5-boilerplate ./new-site\e[79X\e[79C\e[32m\r\n√\e[m \e[1m\e[97mSelect language\e[m \e[90m»\e[m English (en)\e[102X\e[102C\e[32m\r\n√\e[m html5-boilerplate@latest copied to D:\\projects\\new-site in 1.51 seconds . Have fun!\e[49X\e[49C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\r\n\e[134X\e[134C\e[7;1H\e[?25h"
+  - delay: 8
+    content: "\e[?25l\e]0;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\a\e[?25h"
+  - delay: 17
+    content: "\e[?25lPS D:\\projects> \e[?25h"
+  - delay: 2000
+    content: "\e[?25h"
