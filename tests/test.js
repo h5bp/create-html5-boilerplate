@@ -48,7 +48,6 @@ const runCli = async ({
     await fs.ensureDir(defaultDir);
     prevCwd = process.cwd();
     process.chdir(defaultDir);
-       let test={vlad:"test"};
   }
 
   if (version) {
