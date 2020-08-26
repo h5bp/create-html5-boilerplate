@@ -19,7 +19,7 @@
   },
   "scripts": {
     "test": "jest",
-    "format": "prettier --write \"./cli.js\" \"tests/*.js\"",
+    "format": "prettier --write \"./lib/*.js\" \"tests/*.js\"",
     "coverage": "jest --coverage --collectCoverageOnlyFrom ./lib/cli.js"
   },
   "files": [
@@ -41,9 +41,7 @@
     "yargs-parser": "^19.0.1"
   },
   "devDependencies": {
-    "husky": "^4.2.5",
     "jest": "^26.0.1",
-    "prettier": "^2.0.5",
-    "pretty-quick": "^3.0.0"
+    "prettier": "^2.0.5"
   }
 }
