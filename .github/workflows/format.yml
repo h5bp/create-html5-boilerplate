@@ -1,9 +1,9 @@
 name: Prettier code formatting
 on:
   push:
-    branches: [master, format, format-tests]
+    branches: [master]
   pull_request:
-    branches: [master, format]
+    branches: [master]
 jobs:
   format:
     runs-on: ubuntu-latest
