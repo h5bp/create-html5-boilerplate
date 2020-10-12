@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 const fs = require("fs-extra");
 const cli = require("../lib/cli");
 const os = require("os");
