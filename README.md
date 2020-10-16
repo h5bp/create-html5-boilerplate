@@ -1,6 +1,7 @@
 # Create HTML5 Boilerplate
 
 [![Coverage Status](https://coveralls.io/repos/github/h5bp/create-html5-boilerplate/badge.svg?branch=master)](https://coveralls.io/github/h5bp/create-html5-boilerplate?branch=master)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 Quick start for HTML5 Boilerplate. Get up and running with one command.
 
