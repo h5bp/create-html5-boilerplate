@@ -20,7 +20,8 @@
   "scripts": {
     "test": "jest",
     "format": "prettier --write \"./cli.js\" \"tests/*.js\"",
-    "coverage": "jest --coverage --collectCoverageOnlyFrom ./lib/cli.js"
+    "coverage": "jest --coverage --collectCoverageOnlyFrom ./lib/cli.js",
+    "semantic-release": "semantic-release"
   },
   "files": [
     "lib/**/*",
