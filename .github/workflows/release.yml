@@ -11,17 +11,24 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      - name: Get npm cache directory
+        id: npm-cache
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       - uses: actions/checkout@v2
-
-      - uses: actions/setup-node@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
         with:
           node-version: "12"
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Build
-        run: npm run build
 
       - name: Test
         run: npm test
