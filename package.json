@@ -38,13 +38,13 @@
     "ora": "^5.0.0",
     "pacote": "^11.1.10",
     "prompts": "^2.3.2",
-    "yargs-parser": "^19.0.1"
+    "yargs-parser": "^20.2.3"
   },
   "devDependencies": {
     "husky": "^4.3.0",
-    "jest": "^26.0.1",
-    "prettier": "^2.0.5",
-    "pretty-quick": "^3.0.0"
+    "jest": "^26.5.3",
+    "prettier": "^2.1.2",
+    "pretty-quick": "^3.1.0"
   },
   "husky": {
     "hooks": {
