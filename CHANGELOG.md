@@ -1,4 +1,4 @@
-## 0.2.0 (August 27, 2020)
+## 0.2.0 (October 22, 2020)
 
 - Prompt: Remove jQuery in < v8 ([#12](https://github.com/h5bp/create-html5-boilerplate/pull/24), [#24](https://github.com/h5bp/create-html5-boilerplate/pull/24))
 - Readme fixes ([#23](https://github.com/h5bp/create-html5-boilerplate/pull/23), [#41](https://github.com/h5bp/create-html5-boilerplate/pull/41))
