@@ -19,6 +19,7 @@
   },
   "scripts": {
     "test": "jest",
+    "lint": "eslint lib/cli.js",
     "format": "prettier --write \"./cli.js\" \"tests/*.js\"",
     "coverage": "jest --coverage --collectCoverageOnlyFrom ./lib/cli.js"
   },
@@ -42,6 +43,7 @@
     "yargs-parser": "^20.2.3"
   },
   "devDependencies": {
+    "eslint": "^7.12.1",
     "husky": "^4.3.0",
     "jest": "^26.5.3",
     "prettier": "^2.1.2",
