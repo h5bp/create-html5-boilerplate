@@ -20,7 +20,8 @@
   "scripts": {
     "test": "jest",
     "format": "prettier --write \"./cli.js\" \"tests/*.js\"",
-    "coverage": "jest --coverage --collectCoverageOnlyFrom ./lib/cli.js"
+    "coverage": "jest --coverage --collectCoverageOnlyFrom ./lib/cli.js",
+    "semantic-release": "semantic-release"
   },
   "files": [
     "lib/**/*",
@@ -42,10 +43,13 @@
     "yargs-parser": "^20.2.3"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/git": "^9.0.0",
     "husky": "^4.3.0",
     "jest": "^26.6.1",
     "prettier": "^2.1.2",
-    "pretty-quick": "^3.1.0"
+    "pretty-quick": "^3.1.0",
+    "semantic-release": "^17.2.1"
   },
   "husky": {
     "hooks": {
