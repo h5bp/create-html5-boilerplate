@@ -33,7 +33,7 @@
   "dependencies": {
     "chalk": "^4.1.1",
     "compare-versions": "^3.6.0",
-    "elapsed-time-logger": "^1.1.6",
+    "elapsed-time-logger": "^1.1.7",
     "fast-glob": "^3.2.5",
     "fs-extra": "^10.0.0",
     "fuzzy": "^0.1.3",
