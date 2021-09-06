@@ -50,7 +50,7 @@
     "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-prettier": "^3.4.1",
     "@semantic-release/changelog": "^5.0.1",
-    "@semantic-release/git": "^9.0.0",
+    "@semantic-release/git": "^9.0.1",
     "husky": "^7.0.2",
     "jest": "^27.1.0",
     "prettier": "^2.3.2",
