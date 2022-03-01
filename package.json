@@ -41,7 +41,7 @@
     "inquirer-autocomplete-prompt": "^2.0.0",
     "ora": "^5.4.0",
     "pacote": "^13.0.3",
-    "yargs-parser": "^21.0.0"
+    "yargs-parser": "^21.0.1"
   },
   "devDependencies": {
     "eslint": "^8.10.0",
