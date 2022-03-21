@@ -40,7 +40,7 @@
     "inquirer": "^8.2.1",
     "inquirer-autocomplete-prompt": "^2.0.0",
     "ora": "^5.4.0",
-    "pacote": "^13.0.3",
+    "pacote": "^13.0.5",
     "yargs-parser": "^21.0.1"
   },
   "devDependencies": {
