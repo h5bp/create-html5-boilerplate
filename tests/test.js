@@ -5,9 +5,10 @@
 const fs = require("fs-extra");
 const cli = require("../lib/cli");
 const os = require("os");
+const path = require("path");
 const packageName = "html5-boilerplate";
 const tempDir = os.tmpdir() + `/${packageName}-staging`;
-const defaultDir = "./out/default_dir";
+const defaultDir = path.resolve(__dirname, "../", "./out/default_dir");
 
 // TODO: fetch all versions:
 // const { packument } = require('pacote');
@@ -63,7 +64,8 @@ const runCli = async ({
   if (lang) {
     argvs.push("--lang=" + lang);
   }
-
+  // console.log(process.cwd());
+  // process.exit(0);
   await cli(argvs);
   if (prevCwd) {
     process.chdir(prevCwd); //revert process current dir
@@ -71,6 +73,8 @@ const runCli = async ({
 };
 describe.each(cases)("Downloading %s", (version) => {
   beforeAll(async () => {
+    await fs.remove("./out");
+    await fs.ensureDir("./out");
     await runCli({ version: version, dir: version, skip: true });
   });
   afterAll(async () => {
