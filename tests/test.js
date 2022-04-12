@@ -4,6 +4,7 @@
 
 import fs from "fs-extra";
 import os from "os";
+import path from "path";
 import cli from "../lib/cli";
 
 const packageName = "html5-boilerplate";
@@ -64,7 +65,8 @@ const runCli = async ({
   if (lang) {
     argvs.push("--lang=" + lang);
   }
-
+  // console.log(process.cwd());
+  // process.exit(0);
   await cli(argvs);
   if (prevCwd) {
     process.chdir(prevCwd); // revert process current dir
@@ -73,6 +75,8 @@ const runCli = async ({
 
 describe.each(cases)("Downloading %s", (version) => {
   beforeAll(async () => {
+    await fs.remove("./out");
+    await fs.ensureDir("./out");
     await runCli({ version: version, dir: version, skip: true });
   });
   afterAll(async () => {
