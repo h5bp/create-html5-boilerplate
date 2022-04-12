@@ -2,18 +2,19 @@
  * @jest-environment node
  */
 
-const fs = require("fs-extra");
-const cli = require("../lib/cli");
-const os = require("os");
+import fs from "fs-extra";
+import os from "os";
+import cli from "../lib/cli";
+
 const packageName = "html5-boilerplate";
-const tempDir = os.tmpdir() + `/${packageName}-staging`;
+const tempDir = `${os.tmpdir()}/${packageName}-staging`;
 const defaultDir = "./out/default_dir";
 
 // TODO: fetch all versions:
 // const { packument } = require('pacote');
 // const versions = await packument(packageName);
 // cases = ['', 'latest', '-r=7.3.0', ...Object.keys(versions)];
-const all_versions = [
+const allVersions = [
   "0.0.1",
   "5.3.0",
   "6.0.0",
@@ -33,10 +34,10 @@ const cases = [
   "-r=v7.2.0",
   "-r=v7.2",
   "--release=7.3.0",
-  ...all_versions.map((v) => "-r=" + v),
+  ...allVersions.map((v) => `-r=${v}`),
 ];
 
-const outputFolder = (version = null) => "./out/" + (version || "default_dir");
+const outputFolder = (version = null) => `./out/${version || "default_dir"}`;
 
 const runCli = async ({
   version = null,
@@ -47,7 +48,7 @@ const runCli = async ({
   let argvs = [];
   let prevCwd;
   if (dir) {
-    argvs.push("./out/" + dir);
+    argvs.push(`./out/${dir}`);
   } else {
     await fs.ensureDir(defaultDir);
     prevCwd = process.cwd();
@@ -66,9 +67,10 @@ const runCli = async ({
 
   await cli(argvs);
   if (prevCwd) {
-    process.chdir(prevCwd); //revert process current dir
+    process.chdir(prevCwd); // revert process current dir
   }
 };
+
 describe.each(cases)("Downloading %s", (version) => {
   beforeAll(async () => {
     await runCli({ version: version, dir: version, skip: true });
@@ -77,7 +79,7 @@ describe.each(cases)("Downloading %s", (version) => {
     await fs.remove(outputFolder(version));
   });
 
-  if (version && version != "-r=latest") {
+  if (version && version !== "-r=latest") {
     // if we will fetch all versions from npm registry we will be able to check latest
     // for now we will skip this test for 'latest' version
     test(`Version is correct: ${version}`, async () => {
