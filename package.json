@@ -19,7 +19,7 @@
     "create-html5-boilerplate": "./index.js"
   },
   "scripts": {
-    "test": "jest",
+    "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
     "lint": "eslint lib/cli.js",
     "format": "prettier --write \"./cli.js\" \"tests/*.js\"",
     "coverage": "jest --coverage --collectCoverageOnlyFrom ./lib/cli.js",
