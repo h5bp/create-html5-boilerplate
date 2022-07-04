@@ -22,7 +22,7 @@
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
     "lint": "eslint lib/cli.js",
     "format": "prettier --write \"./cli.js\" \"tests/*.js\"",
-    "coverage": "jest --coverage --collectCoverageOnlyFrom ./lib/cli.js",
+    "coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --collectCoverageOnlyFrom ./lib/cli.js",
     "semantic-release": "semantic-release"
   },
   "files": [
