@@ -14,14 +14,15 @@
   "license": "MIT",
   "author": "@h5bp",
   "main": "index.js",
+  "type": "module",
   "bin": {
     "create-html5-boilerplate": "./index.js"
   },
   "scripts": {
-    "test": "jest",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
     "lint": "eslint lib/cli.js",
     "format": "prettier --write \"./cli.js\" \"tests/*.js\"",
-    "coverage": "jest --coverage --collectCoverageOnlyFrom ./lib/cli.js",
+    "coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --collectCoverageOnlyFrom ./lib/cli.js",
     "semantic-release": "semantic-release"
   },
   "files": [
