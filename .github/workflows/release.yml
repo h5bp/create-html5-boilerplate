@@ -1,50 +1,18 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
+name: publish npm
 
-name: Release
 on:
-  push:
-    branches:
-      - main
-      - next
-jobs:
   release:
+    types: [published]
+
+jobs:
+  publish-npm:
     runs-on: ubuntu-latest
     steps:
-      - name: Get npm cache directory
-        id: npm-cache
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-      - uses: actions/cache@v3
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
       - uses: actions/checkout@v3
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          registry-url: https://registry.npmjs.org/
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Test
-        run: npm test
-
-      - name: publish npm
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-
-      - name: Publish GHP
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-          registry-url: https://npm.pkg.github.com/
-      - run: npm install
+          registry-url: https://registry.npmjs.org/
       - run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}

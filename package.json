@@ -1,6 +1,6 @@
 {
   "name": "create-html5-boilerplate",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "An npm based quickstart app for HTML5-Boilerplate",
   "keywords": [],
   "homepage": "https://html5boilerplate.com/",
@@ -22,8 +22,7 @@
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
     "lint": "eslint lib/cli.js",
     "format": "prettier --write \"./cli.js\" \"tests/*.js\"",
-    "coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --collectCoverageOnlyFrom ./lib/cli.js",
-    "semantic-release": "semantic-release"
+    "coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --collectCoverageOnlyFrom ./lib/cli.js"
   },
   "files": [
     "lib/**/*",
@@ -46,8 +45,6 @@
     "yargs-parser": "^21.0.1"
   },
   "devDependencies": {
-    "@semantic-release/changelog": "^6.0.1",
-    "@semantic-release/git": "^10.0.1",
     "eslint": "^8.18.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^8.5.0",
