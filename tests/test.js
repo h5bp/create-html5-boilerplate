@@ -4,7 +4,6 @@
 
 import fs from "fs-extra";
 import os from "os";
-import path from "path";
 import cli from "../lib/cli";
 
 const packageName = "html5-boilerplate";
@@ -47,7 +46,7 @@ const runCli = async ({
   skip = false,
   lang = null,
 }) => {
-  let argvs = [];
+  const argvs = [];
   let prevCwd;
   if (dir) {
     argvs.push(`./out/${dir}`);
@@ -64,7 +63,7 @@ const runCli = async ({
     argvs.push("-y");
   }
   if (lang) {
-    argvs.push("--lang=" + lang);
+    argvs.push(`--lang=${lang}`);
   }
   // console.log(process.cwd());
   // process.exit(0);
