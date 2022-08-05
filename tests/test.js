@@ -4,7 +4,8 @@
 
 import fs from "fs-extra";
 import os from "os";
-import cli from "../lib/cli";
+// eslint-disable-next-line import/extensions
+import cli from "../lib/cli.js";
 
 const packageName = "html5-boilerplate";
 const tempDir = `${os.tmpdir()}/${packageName}-staging`;
@@ -77,7 +78,7 @@ describe.each(cases)("Downloading %s", (version) => {
   beforeAll(async () => {
     await fs.remove("./out");
     await fs.ensureDir("./out");
-    await runCli({ version: version, dir: version, skip: true });
+    await runCli({ version, dir: version, skip: true });
   });
   afterAll(async () => {
     await fs.remove(outputFolder(version));
@@ -130,7 +131,7 @@ describe.each(cases)("Downloading %s", (version) => {
 
   test("Target directory contains img/.gitignore", async () => {
     const imgGitIgnore = await fs.exists(
-      outputFolder(version) + "/img/.gitignore"
+      `${outputFolder(version)}/img/.gitignore`
     );
     expect(imgGitIgnore).toBe(true);
   });
@@ -143,11 +144,11 @@ describe.each(cases)("Downloading %s", (version) => {
 
 describe("Errors", () => {
   test("Wrong version 6..2.3", async () => {
-    //maybe create test.each() for more errors scenarios
+    // maybe create test.each() for more errors scenarios
     const version = "-r=6..2.3";
     try {
       await runCli({
-        version: version,
+        version,
         dir: version,
         skip: true,
       });
@@ -161,11 +162,11 @@ describe("Errors", () => {
 
 describe("Unexpected errors", () => {
   test("Unexpected error 6..2.3,7.2.3", async () => {
-    //maybe create test.each() for more errors scenarios
+    // maybe create test.each() for more errors scenarios
     const version = "-r=6..2.3,7.2.3";
     try {
       await runCli({
-        version: version,
+        version,
         dir: version,
         skip: true,
       });
