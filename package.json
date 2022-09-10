@@ -43,7 +43,7 @@
     "npm": "^8.15.1",
     "ora": "^5.4.0",
     "pacote": "^13.6.2",
-    "yargs-parser": "^21.0.1"
+    "yargs-parser": "^21.1.1"
   },
   "devDependencies": {
     "eslint": "^8.21.0",
