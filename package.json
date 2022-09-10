@@ -42,7 +42,7 @@
     "jest-light-runner": "^0.2.2",
     "npm": "^8.15.1",
     "ora": "^5.4.0",
-    "pacote": "^13.6.1",
+    "pacote": "^13.6.2",
     "yargs-parser": "^21.0.1"
   },
   "devDependencies": {
