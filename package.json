@@ -40,7 +40,7 @@
     "inquirer": "^8.2.4",
     "inquirer-autocomplete-prompt": "^2.0.0",
     "jest-light-runner": "^0.4.0",
-    "npm": "^8.15.1",
+    "npm": "^8.19.2",
     "ora": "^5.4.0",
     "pacote": "^13.6.2",
     "yargs-parser": "^21.1.1"
