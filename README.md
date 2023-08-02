@@ -1,9 +1,5 @@
 # Create HTML5 Boilerplate
 
-[![codecov](https://codecov.io/gh/h5bp/create-html5-boilerplate/branch/master/graph/badge.svg?token=H8V43VURZJ)](https://codecov.io/gh/h5bp/create-html5-boilerplate)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/h5bp/create-html5-boilerplate.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/h5bp/create-html5-boilerplate/alerts/)
-
 Quick start for HTML5 Boilerplate. Get up and running with one command.
 
 ## Getting Started
