@@ -90,7 +90,7 @@ describe.each(cases)("Downloading %s", (version) => {
     test(`Version is correct: ${version}`, async () => {
       const cssContent = await fs.readFile(
         `./out/${version}/css/main.css`,
-        "utf-8"
+        "utf-8",
       );
       let versionClear = version.replace(/(-r=|--release=|v)/gi, "");
       if (versionClear === "7.0.0") {
@@ -100,7 +100,7 @@ describe.each(cases)("Downloading %s", (version) => {
         versionClear = "5.3.0";
       }
       expect(
-        cssContent.indexOf(`HTML5 Boilerplate v${versionClear}`) > -1
+        cssContent.indexOf(`HTML5 Boilerplate v${versionClear}`) > -1,
       ).toBe(true);
     });
   }
@@ -131,7 +131,7 @@ describe.each(cases)("Downloading %s", (version) => {
 
   test("Target directory contains img/.gitignore", async () => {
     const imgGitIgnore = await fs.exists(
-      `${outputFolder(version)}/img/.gitignore`
+      `${outputFolder(version)}/img/.gitignore`,
     );
     expect(imgGitIgnore).toBe(true);
   });
