@@ -1,6 +1,5 @@
 import fs from "fs-extra";
 import os from "os";
-// eslint-disable-next-line import/extensions
 import cli from "../lib/cli.js";
 
 const packageName = "html5-boilerplate";

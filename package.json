@@ -20,8 +20,8 @@
   },
   "scripts": {
     "test": "vitest run",
-    "lint": "eslint lib/cli.js",
-    "format": "prettier --write \"./lib/cli.js\" \"tests/*.js\"",
+    "lint": "eslint .",
+    "format": "prettier --write *.js lib",
     "coverage": "vitest run --coverage"
   },
   "files": [
@@ -45,12 +45,11 @@
     "yargs-parser": "^21.1.1"
   },
   "devDependencies": {
-    "eslint": "^8.46.0",
-    "eslint-config-airbnb": "^19.0.4",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-import": "^2.28.0",
-    "eslint-plugin-jest": "^27.6.0",
-    "eslint-plugin-prettier": "^5.0.0",
+    "@eslint/js": "^9.39.2",
+    "@vitest/eslint-plugin": "^1.6.3",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^16.5.0",
     "husky": "^9.0.11",
     "prettier": "^3.0.0",
     "pretty-quick": "^3.1.3",
