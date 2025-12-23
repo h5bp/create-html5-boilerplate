@@ -1,7 +1,3 @@
-/**
- * @jest-environment node
- */
-
 import fs from "fs-extra";
 import os from "os";
 // eslint-disable-next-line import/extensions
