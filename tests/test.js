@@ -1,34 +1,27 @@
-/**
- * @jest-environment node
- */
+import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
+import { mkdtemp, mkdir, readFile, readdir, rm, stat } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { test } from "node:test";
+import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 
-import fs from "fs-extra";
-import os from "os";
-// eslint-disable-next-line import/extensions
-import cli from "../lib/cli.js";
+// Register the CLI as a dependency so test watch mode reruns on source changes.
+import "../lib/cli.js";
 
-const packageName = "html5-boilerplate";
-const tempDir = `${os.tmpdir()}/${packageName}-staging`;
-const defaultDir = "./out/default_dir";
-
-// TODO: fetch all versions:
-// const { packument } = require('pacote');
-// const versions = await packument(packageName);
-// cases = ['', 'latest', '-r=7.3.0', ...Object.keys(versions)];
-const allVersions = [
-  "0.0.1",
-  "5.3.0",
-  "6.0.0",
-  "6.0.1",
-  "6.1.0",
-  "7.0.0",
-  "7.0.1",
-  "7.1.0",
-  "7.2.0",
-  "7.3.0",
-  "8.0.0",
-];
-const cases = [
+const execFileAsync = promisify(execFile);
+const cliUrl = new URL("../lib/cli.js", import.meta.url).href;
+const runner = `
+  const { default: cli } = await import(process.argv[1]);
+  try {
+    await cli(process.argv.slice(2));
+  } catch (error) {
+    console.error("CLI_ERROR:", error);
+    process.exitCode = 1;
+  }
+`;
+const versions = [
   null,
   "-r=latest",
   "-r=7",
@@ -36,157 +29,129 @@ const cases = [
   "-r=v7.2.0",
   "-r=v7.2",
   "--release=7.3.0",
-  ...allVersions.map((v) => `-r=${v}`),
+  ...[
+    "0.0.1",
+    "5.3.0",
+    "6.0.0",
+    "6.0.1",
+    "6.1.0",
+    "7.0.0",
+    "7.0.1",
+    "7.1.0",
+    "7.2.0",
+    "7.3.0",
+    "8.0.0",
+  ].map((version) => `-r=${version}`),
 ];
 
-const outputFolder = (version = null) => `./out/${version || "default_dir"}`;
+async function workspace(t) {
+  const root = await mkdtemp(path.join(os.tmpdir(), "create-h5bp-test-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const cwd = path.join(root, "cwd");
+  const tmp = path.join(root, "tmp");
+  await Promise.all([mkdir(cwd), mkdir(tmp)]);
+  return { cwd, tmp };
+}
 
-const runCli = async ({
-  version = null,
-  dir = null,
-  skip = false,
-  lang = null,
-}) => {
-  const argvs = [];
-  let prevCwd;
-  if (dir) {
-    argvs.push(`./out/${dir}`);
-  } else {
-    await fs.ensureDir(defaultDir);
-    prevCwd = process.cwd();
-    process.chdir(defaultDir);
-  }
+async function runCli({ cwd, tmp }, args) {
+  return execFileAsync(
+    process.execPath,
+    ["--input-type=module", "-e", runner, cliUrl, ...args],
+    {
+      cwd,
+      env: { ...process.env, TMPDIR: tmp, TMP: tmp, TEMP: tmp, NO_COLOR: "1" },
+    },
+  );
+}
 
-  if (version) {
-    argvs.push(version);
-  }
-  if (skip) {
-    argvs.push("-y");
-  }
-  if (lang) {
-    argvs.push(`--lang=${lang}`);
-  }
-  // console.log(process.cwd());
-  // process.exit(0);
-  await cli(argvs);
-  if (prevCwd) {
-    process.chdir(prevCwd); // revert process current dir
-  }
-};
-
-describe.each(cases)("Downloading %s", (version) => {
-  beforeAll(async () => {
-    await fs.remove("./out");
-    await fs.ensureDir("./out");
-    await runCli({ version, dir: version, skip: true });
+async function assertStagingRemoved(tmp) {
+  await assert.rejects(stat(path.join(tmp, "html5-boilerplate-staging")), {
+    code: "ENOENT",
   });
-  afterAll(async () => {
-    await fs.remove(outputFolder(version));
-  });
+}
 
-  if (version && version !== "-r=latest") {
-    // if we will fetch all versions from npm registry we will be able to check latest
-    // for now we will skip this test for 'latest' version
-    test(`Version is correct: ${version}`, async () => {
-      const cssContent = await fs.readFile(
-        `./out/${version}/css/main.css`,
-        "utf-8",
-      );
-      let versionClear = version.replace(/(-r=|--release=|v)/gi, "");
-      if (versionClear === "7.0.0") {
-        versionClear = "6.1.0";
-      }
-      if (versionClear === "0.0.1") {
-        versionClear = "5.3.0";
-      }
-      expect(
-        cssContent.indexOf(`HTML5 Boilerplate v${versionClear}`) > -1,
-      ).toBe(true);
-    });
-  }
+test("downloads supported releases", { concurrency: 4 }, async (t) => {
+  await Promise.all(
+    versions.map((version) =>
+      t.test(`Downloading ${version || "default"}`, async (t) => {
+        const work = await workspace(t);
+        const target = version ? path.join(work.cwd, "site") : work.cwd;
+        const args = version ? ["site", version, "-y"] : ["-y"];
+        const { stdout, stderr } = await runCli(work, args);
+        assert.equal(stdout.trim(), target);
+        assert.match(stderr, /copied to/);
+        assert.ok((await readdir(target)).length >= 7);
+        for (const entry of ["index.html", "robots.txt", "css", "js", "img"]) {
+          await stat(path.join(target, entry));
+        }
+        if (version && version !== "-r=latest") {
+          let expected = version.replace(/(-r=|--release=|v)/gi, "");
+          if (expected === "7.0.0") expected = "6.1.0";
+          if (expected === "0.0.1") expected = "5.3.0";
+          const css = await readFile(path.join(target, "css/main.css"), "utf8");
+          assert.ok(css.includes(`HTML5 Boilerplate v${expected}`));
+          for (const entry of ["tile.png", ".gitignore", "img/.gitignore"]) {
+            await stat(path.join(target, entry));
+          }
+        }
+        await assertStagingRemoved(work.tmp);
+      }),
+    ),
+  );
+});
 
-  test("Target directory exists", async () => {
-    const outDirExists = await fs.exists(outputFolder(version));
-    expect(outDirExists).toBe(true);
-  });
-
-  test("Target directory have files", async () => {
-    const dirContents = await fs.readdir(outputFolder(version));
-    expect(dirContents.length).toBeGreaterThanOrEqual(7);
-  });
-
-  test("Target directory contains specific files", async () => {
-    const dirContents = await fs.readdir(outputFolder(version));
-    const check = [
-      "index.html",
-      "robots.txt",
-      "tile.png",
-      "css",
-      "js",
-      "img",
-      ".gitignore",
-    ].filter((v) => dirContents.indexOf(v) === -1);
-    expect(check.length === 0).toBe(true);
-  });
-
-  test("Target directory contains img/.gitignore", async () => {
-    const imgGitIgnore = await fs.exists(
-      `${outputFolder(version)}/img/.gitignore`,
+test(
+  "invalid releases surface errors and remove staging",
+  { concurrency: 2 },
+  async (t) => {
+    await Promise.all(
+      [
+        ["-r=6..2.3", /CLI_ERROR: ETARGET/],
+        ["-r=6..2.3,7.2.3", /CLI_ERROR: Error:/],
+      ].map(([version, message]) =>
+        t.test(version, async (t) => {
+          const work = await workspace(t);
+          await assert.rejects(
+            runCli(work, ["site", version, "-y"]),
+            (error) => {
+              assert.match(error.stderr, message);
+              return true;
+            },
+          );
+          await assertStagingRemoved(work.tmp);
+        }),
+      ),
     );
-    expect(imgGitIgnore).toBe(true);
-  });
+  },
+);
 
-  test("Temp directory removed", async () => {
-    const tempDirExists = await fs.exists(tempDir);
-    expect(tempDirExists).toBe(false);
-  });
+test("applies an explicit language", async (t) => {
+  const work = await workspace(t);
+  await runCli(work, ["site", "--lang=en-US"]);
+  const html = await readFile(path.join(work.cwd, "site/index.html"), "utf8");
+  assert.ok(html.includes('lang="en-US"'));
+  await assertStagingRemoved(work.tmp);
 });
 
-describe("Errors", () => {
-  test("Wrong version 6..2.3", async () => {
-    // maybe create test.each() for more errors scenarios
-    const version = "-r=6..2.3";
-    try {
-      await runCli({
-        version,
-        dir: version,
-        skip: true,
-      });
-    } catch (err) {
-      expect(err).toBe("ETARGET");
-    } finally {
-      await fs.remove(outputFolder(version));
-    }
-  });
-});
-
-describe("Unexpected errors", () => {
-  test("Unexpected error 6..2.3,7.2.3", async () => {
-    // maybe create test.each() for more errors scenarios
-    const version = "-r=6..2.3,7.2.3";
-    try {
-      await runCli({
-        version,
-        dir: version,
-        skip: true,
-      });
-    } catch (err) {
-      expect(err).not.toBe("ETARGET");
-    } finally {
-      await fs.remove(outputFolder(version));
-    }
-  });
-});
-
-describe("lang", () => {
-  test("lang", async () => {
-    const lang = "en-US";
-    await runCli({
-      lang: "en-US",
-      dir: `lang_${lang}`,
-    });
-    const fileContent = await fs.readFile("./out/lang_en-US/index.html");
-    expect(fileContent.indexOf(`lang="${lang}"`) > -1).toBe(true);
-    await fs.remove(`./out/lang_${lang}`);
-  });
+test("the published entry point downloads a release", async (t) => {
+  const work = await workspace(t);
+  const entry = new URL("../index.js", import.meta.url);
+  const { stdout, stderr } = await execFileAsync(
+    process.execPath,
+    [fileURLToPath(entry), "site", "-r=7.3.0", "--yes"],
+    {
+      cwd: work.cwd,
+      env: {
+        ...process.env,
+        TMPDIR: work.tmp,
+        TMP: work.tmp,
+        TEMP: work.tmp,
+        NO_COLOR: "1",
+      },
+    },
+  );
+  assert.equal(stdout.trim(), path.join(work.cwd, "site"));
+  assert.match(stderr, /html5-boilerplate@7\.3\.0 copied to/);
+  await stat(path.join(work.cwd, "site/index.html"));
+  await assertStagingRemoved(work.tmp);
 });
