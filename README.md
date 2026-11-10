@@ -43,11 +43,9 @@ These commands are equivalent and do the following:
 
 ## Requirements
 
-`create-html5-boilerplate` is cross-platform. It works wherever node and npm work.
-The only requirements are for `npx`, which requires npm version 5.2 or greater and
-`npm init` which requires an npm version greater than 6.0. If you're stuck on an
-older version of npm you can still use `create-html5-boilerplate` by running the
-following command to install the project globally.
+`create-html5-boilerplate` is cross-platform and requires Node.js 22.13.0 or
+newer. Node.js 22, 24 and 26 are tested in CI. You can also install the project
+globally:
 
 ```
 npm install -g create-html5-boilerplate
@@ -78,7 +76,7 @@ npm start
 ### Setting Up a Local Copy
 
 1. Clone the repo with `git clone https://github.com/h5bp/create-html5-boilerplate.git`
-2. Run `npm install` in the root `create-html5-boilerplate` folder.
+2. Run `npm ci` in the root `create-html5-boilerplate` folder.
 3. Run `npm link` to make npm run local copy instead of downloading from registry
 4. Now you can use `npm init html5-boilerplate` and `npx create-html5-boilerplate`
 
@@ -97,7 +95,30 @@ npm start
 
 ### Tests
 
-Tests are written using [jest](https://jestjs.io/) and located in `tests/test.js`
-run `npm test`
+Tests use the [Node.js test runner](https://nodejs.org/api/test.html) and are
+located in `tests/test.js`. They download published HTML5 Boilerplate versions
+from the npm registry and use isolated temporary directories to run in parallel.
 
-run coverage reports `npm run coverage`
+Run `npm test`, `npm run test:watch`, or `npm run coverage`. Run `npm run lint`
+and `npm run format:check` to check the code, or `npm run format` to format it.
+`npm run prepare` installs the Husky hook for formatting staged files.
+
+### Dependency upgrade notes
+
+The `pacote` upgrade from 17 to 21 is a major change; version 22 requires newer
+Node 22 and 24 patch releases than this project's minimum. The unused direct
+`npm` dependency and Jest runner were removed. The flat ESLint configuration
+replaces Airbnb's legacy configuration with the recommended ESLint and import
+rules plus Prettier; it does not preserve every Airbnb rule.
+
+Further major upgrades of Chalk, Ora, and yargs-parser should be reviewed for
+API and output changes. Inquirer is intentionally kept at 9 because
+`inquirer-autocomplete-prompt` requires it; upgrading requires a prompt migration.
+`fuzzy`, `elapsed-time-logger`, and the autocomplete prompt have not had recent
+releases and should be evaluated for replacement separately to avoid changing
+CLI behavior in this baseline update.
+
+The production dependency audit on November 10, 2026 reported 15 moderate and
+one high advisory, including transitive dependencies of `pacote` and `picomatch`.
+Run `npm audit --omit=dev` for current details; further remediation needs review
+against the supported Node versions and CLI compatibility.
