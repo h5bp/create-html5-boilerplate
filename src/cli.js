@@ -1,5 +1,16 @@
-import { readFile } from "node:fs/promises";
+import * as fs from "node:fs/promises";
+import path from "node:path";
 import { parseArgs } from "node:util";
+
+async function pathExists(target) {
+  try {
+    await fs.access(target);
+    return true;
+  } catch (error) {
+    if (error.code === "ENOENT") return false;
+    throw error;
+  }
+}
 
 export async function runCli(argv = process.argv) {
   if (Number(process.versions.node.split(".")[0]) < 20) {
@@ -72,7 +83,7 @@ Options:
   if (options.version) {
     try {
       const packageJson = JSON.parse(
-        await readFile(new URL("../package.json", import.meta.url), "utf8"),
+        await fs.readFile(new URL("../package.json", import.meta.url), "utf8"),
       );
       console.log(packageJson.version);
     } catch (error) {
@@ -84,23 +95,19 @@ Options:
 
   try {
     const [
-      { default: path },
       { default: chalk },
       { default: inquirer },
       { default: fuzzy },
       { default: ora },
-      { default: fs },
       { default: elapsed },
       { default: compareVersions },
       { default: inquirerAutocompletePrompt },
       { generate },
     ] = await Promise.all([
-      import("path"),
       import("chalk"),
       import("inquirer"),
       import("fuzzy"),
       import("ora"),
-      import("fs-extra"),
       import("elapsed-time-logger"),
       import("compare-versions"),
       import("inquirer-autocomplete-prompt"),
@@ -112,7 +119,7 @@ Options:
     const version = options.release || "latest";
     const destination = path.resolve(process.cwd(), positionals[0] || "./");
 
-    if ((await fs.pathExists(destination)) && !yes) {
+    if ((await pathExists(destination)) && !yes) {
       const folderFiles = await fs.readdir(destination);
       if (folderFiles.length !== -1) {
         const { override } = await inquirer.prompt({
@@ -203,8 +210,8 @@ Options:
         spinner.fail(message + error.versions.reverse().join(" | "));
         throw error.code;
       }
-      spinner.fail("✖ Unexpected error");
-      throw new Error(error);
+      spinner.fail(`Could not generate project at ${destination}`);
+      throw error;
     }
   } catch (error) {
     console.error(error);

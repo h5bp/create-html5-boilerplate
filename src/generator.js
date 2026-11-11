@@ -1,7 +1,8 @@
-import os from "os";
+import * as fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import pacote from "pacote";
 import glob from "fast-glob";
-import fs from "fs-extra";
 
 export async function generate({
   destination,
@@ -12,15 +13,19 @@ export async function generate({
   onCopied,
   getConfiguration,
 }) {
-  const tempDir = `${os.tmpdir()}/html5-boilerplate-staging`;
-  await fs.ensureDir(tempDir);
+  const tempDir = await fs.mkdtemp(
+    path.join(os.tmpdir(), "html5-boilerplate-staging-"),
+  );
   try {
     const { from: nameWithVersion } = await pacote.extract(
       `html5-boilerplate@${version}`,
       tempDir,
       {},
     );
-    await fs.copy(`${tempDir}/dist`, destination);
+    await fs.cp(path.join(tempDir, "dist"), destination, {
+      recursive: true,
+      force: true,
+    });
     if (onCopied) await onCopied({ destination, nameWithVersion });
 
     const npmIgnoreFiles = await glob(
@@ -37,7 +42,7 @@ export async function generate({
         ? await getConfiguration()
         : { lang, removeJquery };
       if (configuration.lang !== undefined || configuration.removeJquery) {
-        const indexFile = `${destination}/index.html`;
+        const indexFile = path.join(destination, "index.html");
         const sourceHTML = await fs.readFile(indexFile, "utf-8");
         let resultHTML = sourceHTML;
         if (configuration.lang !== undefined) {
@@ -52,11 +57,11 @@ export async function generate({
             "",
           );
         }
-        await fs.writeFile(indexFile, resultHTML);
+        await fs.writeFile(indexFile, resultHTML, "utf-8");
       }
     }
     return { destination, nameWithVersion };
   } finally {
-    await fs.remove(tempDir);
+    await fs.rm(tempDir, { recursive: true, force: true });
   }
 }

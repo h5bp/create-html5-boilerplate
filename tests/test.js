@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import { execFile, spawnSync } from "node:child_process";
-import { mkdtemp, mkdir, readFile, readdir, rm, stat } from "node:fs/promises";
+import {
+  mkdtemp,
+  mkdir,
+  readFile,
+  readdir,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
@@ -53,9 +61,12 @@ async function runCli({ cwd, tmp }, args) {
 }
 
 async function assertStagingRemoved(tmp) {
-  await assert.rejects(stat(path.join(tmp, "html5-boilerplate-staging")), {
-    code: "ENOENT",
-  });
+  assert.deepEqual(
+    (await readdir(tmp)).filter((name) =>
+      name.startsWith("html5-boilerplate-staging"),
+    ),
+    [],
+  );
 }
 
 test("generates independently of CLI arguments", async (t) => {
@@ -85,6 +96,99 @@ test("generates independently of CLI arguments", async (t) => {
   );
   assert.deepEqual(argv, ["node", "unrelated-command", "--release=invalid"]);
   assert.equal(stderr, "");
+  await assertStagingRemoved(work.tmp);
+});
+
+test("concurrent generators use separate staging directories", async (t) => {
+  const work = await workspace(t);
+  const generatorUrl = new URL("../src/generator.js", import.meta.url).href;
+  const script = `
+    const { generate } = await import(${JSON.stringify(generatorUrl)});
+    const fs = await import("node:fs/promises");
+    const path = await import("node:path");
+    const tmp = process.env.TMPDIR;
+    let copied = 0;
+    let checked = 0;
+    let release;
+    let releaseChecks;
+    const bothCopied = new Promise((resolve) => { release = resolve; });
+    const bothChecked = new Promise((resolve) => { releaseChecks = resolve; });
+    const results = await Promise.all(["first", "second"].map((site) =>
+      generate({
+        destination: path.join(process.argv[1], site),
+        version: "7.3.0",
+        skipConfiguration: true,
+        onCopied: async () => {
+          if (++copied === 2) release();
+          await bothCopied;
+          const staging = (await fs.readdir(tmp)).filter((name) =>
+            name.startsWith("html5-boilerplate-staging-")
+          );
+          if (staging.length !== 2) throw new Error("Expected two staging directories");
+          if (++checked === 2) releaseChecks();
+          await bothChecked;
+        },
+      })
+    ));
+    console.log(JSON.stringify(results));
+  `;
+  const { stdout, stderr } = await execFileAsync(
+    process.execPath,
+    ["--input-type=module", "-e", script, work.cwd],
+    {
+      env: { ...process.env, TMPDIR: work.tmp, TMP: work.tmp, TEMP: work.tmp },
+      timeout: 30000,
+    },
+  );
+  const results = JSON.parse(stdout);
+  assert.equal(results.length, 2);
+  for (const site of ["first", "second"]) {
+    await stat(path.join(work.cwd, site, "index.html"));
+  }
+  assert.equal(stderr, "");
+  await assertStagingRemoved(work.tmp);
+});
+
+test("copies over existing files while retaining unrelated files", async (t) => {
+  const work = await workspace(t);
+  const destination = path.join(work.cwd, "site");
+  await mkdir(destination);
+  await writeFile(path.join(destination, "index.html"), "old content", "utf8");
+  await writeFile(path.join(destination, "keep.txt"), "keep", "utf8");
+  await runCli(work, ["site", "-r=7.3.0", "-y"]);
+  assert.match(
+    await readFile(path.join(destination, "index.html"), "utf8"),
+    /<html/,
+  );
+  assert.equal(
+    await readFile(path.join(destination, "keep.txt"), "utf8"),
+    "keep",
+  );
+  await assertStagingRemoved(work.tmp);
+});
+
+test("reports destination collisions and cleans up staging", async (t) => {
+  const work = await workspace(t);
+  const destination = path.join(work.cwd, "site");
+  await writeFile(destination, "keep", "utf8");
+  await assert.rejects(runCli(work, ["site", "-r=7.3.0", "-y"]), (error) => {
+    assert.equal(error.code, 1);
+    assert.match(error.stderr, /Could not generate project at/);
+    assert.match(error.stderr, /ERR_FS_CP_DIR_TO_NON_DIR/);
+    return true;
+  });
+  assert.equal(await readFile(destination, "utf8"), "keep");
+  await assertStagingRemoved(work.tmp);
+});
+
+test("reports filesystem errors when checking a destination", async (t) => {
+  const work = await workspace(t);
+  await writeFile(path.join(work.cwd, "file"), "keep", "utf8");
+  await assert.rejects(runCli(work, ["file/site"]), (error) => {
+    assert.equal(error.code, 1);
+    assert.match(error.stderr, /ENOTDIR/);
+    return true;
+  });
   await assertStagingRemoved(work.tmp);
 });
 
