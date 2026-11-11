@@ -25,6 +25,7 @@ export async function generate({
     await fs.cp(path.join(tempDir, "dist"), destination, {
       recursive: true,
       force: true,
+      verbatimSymlinks: true,
     });
     if (onCopied) await onCopied({ destination, nameWithVersion });
 

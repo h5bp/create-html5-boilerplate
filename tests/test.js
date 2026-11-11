@@ -1,12 +1,15 @@
 import assert from "node:assert/strict";
 import { execFile, spawnSync } from "node:child_process";
 import {
+  chmod,
   mkdtemp,
   mkdir,
   readFile,
+  readlink,
   readdir,
   rm,
   stat,
+  symlink,
   writeFile,
 } from "node:fs/promises";
 import os from "node:os";
@@ -14,7 +17,8 @@ import path from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import "../src/generator.js";
+import pacote from "pacote";
+import { generate } from "../src/generator.js";
 
 // Register the CLI as a dependency so test watch mode reruns on source changes.
 import "../src/cli.js";
@@ -68,6 +72,98 @@ async function assertStagingRemoved(tmp) {
     [],
   );
 }
+
+test("copies all staged files with their contents and permissions", async (t) => {
+  const work = await workspace(t);
+  const destination = path.join(work.cwd, "nested", "site");
+  await mkdir(destination, { recursive: true });
+  await writeFile(path.join(destination, "index.html"), "old");
+  await chmod(path.join(destination, "index.html"), 0o600);
+  await writeFile(path.join(destination, "keep.txt"), "keep");
+  let staging;
+  let copied = false;
+  const files = {
+    "index.html": '<html lang="en">fixture</html>\n',
+    ".npmignore": "node_modules\n",
+    "assets/.npmignore": "generated\n",
+    "assets/script.js": "console.log('fixture');\n",
+  };
+  t.mock.method(pacote, "extract", async (spec, dir) => {
+    assert.equal(spec, "html5-boilerplate@fixture");
+    staging = dir;
+    for (const [name, content] of Object.entries(files)) {
+      const file = path.join(dir, "dist", name);
+      await mkdir(path.dirname(file), { recursive: true });
+      await writeFile(file, content);
+    }
+    await chmod(path.join(dir, "dist", "index.html"), 0o644);
+    await chmod(path.join(dir, "dist", "assets", "script.js"), 0o755);
+    if (process.platform !== "win32") {
+      await symlink("script.js", path.join(dir, "dist", "assets", "link.js"));
+    }
+    return { from: spec };
+  });
+
+  await generate({
+    destination,
+    version: "fixture",
+    skipConfiguration: true,
+    onCopied: async () => {
+      copied = true;
+      for (const [name, content] of Object.entries(files)) {
+        const source = path.join(staging, "dist", name);
+        const target = path.join(destination, name);
+        assert.deepEqual(await readFile(target), Buffer.from(content));
+        if (process.platform !== "win32") {
+          assert.equal(
+            (await stat(target)).mode & 0o777,
+            (await stat(source)).mode & 0o777,
+          );
+        }
+      }
+    },
+  });
+
+  assert.equal(copied, true);
+  assert.deepEqual((await readdir(destination)).sort(), [
+    ".gitignore",
+    "assets",
+    "index.html",
+    "keep.txt",
+  ]);
+  assert.deepEqual((await readdir(path.join(destination, "assets"))).sort(), [
+    ".gitignore",
+    ...(process.platform !== "win32" ? ["link.js"] : []),
+    "script.js",
+  ]);
+  if (process.platform !== "win32") {
+    assert.equal(
+      await readlink(path.join(destination, "assets", "link.js")),
+      "script.js",
+    );
+    assert.equal(
+      await readFile(path.join(destination, "assets", "link.js"), "utf8"),
+      files["assets/script.js"],
+    );
+  }
+  assert.equal(
+    await readFile(path.join(destination, "keep.txt"), "utf8"),
+    "keep",
+  );
+  for (const [name, content] of Object.entries(files)) {
+    const target = name.replace(/\.npmignore$/, ".gitignore");
+    assert.equal(
+      await readFile(path.join(destination, target), "utf8"),
+      content,
+    );
+    if (name !== target) {
+      await assert.rejects(stat(path.join(destination, name)), {
+        code: "ENOENT",
+      });
+    }
+  }
+  await assert.rejects(stat(staging), { code: "ENOENT" });
+});
 
 test("generates independently of CLI arguments", async (t) => {
   const work = await workspace(t);
