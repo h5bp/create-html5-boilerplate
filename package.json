@@ -22,11 +22,12 @@
     "create-html5-boilerplate": "./index.js"
   },
   "scripts": {
-    "test": "node --test",
+    "test": "npm run typecheck && node --test",
     "test:watch": "node --test --watch",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "format": "prettier --write index.js src/*.js tests/*.js eslint.config.js package.json .github/workflows/*.yml",
-    "format:check": "prettier --check index.js src/*.js tests/*.js eslint.config.js package.json .github/workflows/*.yml",
+    "format": "prettier --write index.js src/*.js src/*.d.ts tests/*.js eslint.config.js package.json tsconfig.json .github/workflows/*.yml",
+    "format:check": "prettier --check index.js src/*.js src/*.d.ts tests/*.js eslint.config.js package.json tsconfig.json .github/workflows/*.yml",
     "coverage": "node --test --experimental-test-coverage --test-coverage-include='src/*.js'",
     "prepare": "husky"
   },
@@ -52,6 +53,10 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/inquirer": "^9.0.10",
+    "@types/inquirer-autocomplete-prompt": "^3.0.4",
+    "@types/node": "^20.0.0",
+    "@types/ssri": "^7.1.5",
     "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import-x": "^4.18.1",
@@ -59,6 +64,7 @@
     "globals": "^17.14.0",
     "husky": "^9.1.7",
     "prettier": "^3.9.10",
-    "pretty-quick": "^4.2.2"
+    "pretty-quick": "^4.2.2",
+    "typescript": "^5.9.3"
   }
 }

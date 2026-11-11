@@ -1,17 +1,27 @@
+// @ts-check
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
 
+/**
+ * @param {string} target
+ * @returns {Promise<boolean>}
+ */
 async function pathExists(target) {
   try {
     await fs.access(target);
     return true;
   } catch (error) {
-    if (error.code === "ENOENT") return false;
+    if (error instanceof Error && "code" in error && error.code === "ENOENT")
+      return false;
     throw error;
   }
 }
 
+/**
+ * @param {string[]} [argv]
+ * @returns {Promise<void>}
+ */
 export async function runCli(argv = process.argv) {
   if (Number(process.versions.node.split(".")[0]) < 20) {
     console.error("Node.js 20 or higher is required.");
@@ -51,7 +61,9 @@ export async function runCli(argv = process.argv) {
   } catch (error) {
     if (
       !(error instanceof TypeError) ||
-      !error.code?.startsWith("ERR_PARSE_ARGS_")
+      !("code" in error) ||
+      typeof error.code !== "string" ||
+      !error.code.startsWith("ERR_PARSE_ARGS_")
     ) {
       throw error;
     }
@@ -61,11 +73,14 @@ export async function runCli(argv = process.argv) {
   }
 
   const { values: options, positionals, tokens } = parsed;
-  const yesToken = tokens.findLast(
-    (token) =>
-      token.kind === "option" &&
-      (token.name === "yes" || token.name === "no-yes"),
-  );
+  const yesToken = tokens
+    .slice()
+    .reverse()
+    .find(
+      (token) =>
+        token.kind === "option" &&
+        (token.name === "yes" || token.name === "no-yes"),
+    );
   const yes = yesToken?.name === "yes";
 
   if (options.help) {
@@ -82,6 +97,7 @@ Options:
 
   if (options.version) {
     try {
+      /** @type {{version: string}} */
       const packageJson = JSON.parse(
         await fs.readFile(new URL("../package.json", import.meta.url), "utf8"),
       );
@@ -100,7 +116,7 @@ Options:
       { default: fuzzy },
       { default: ora },
       { default: elapsed },
-      { default: compareVersions },
+      { compareVersions },
       { default: inquirerAutocompletePrompt },
       { generate },
     ] = await Promise.all([
@@ -122,6 +138,7 @@ Options:
     if ((await pathExists(destination)) && !yes) {
       const folderFiles = await fs.readdir(destination);
       if (folderFiles.length !== -1) {
+        /** @type {{override: boolean}} */
         const { override } = await inquirer.prompt({
           type: "confirm",
           name: "override",
@@ -149,12 +166,16 @@ Options:
           console.log(destination);
         },
         getConfiguration: async () => {
+          /** @type {{title: string, value: string}[]} */
           const langsList = JSON.parse(
             await fs.readFile(
               new URL("../lib/countries.json", import.meta.url),
+              "utf8",
             ),
           );
+          /** @type {Record<string, string>} */
           const langListMap = {};
+          /** @type {string[]} */
           const langListOut = [];
           if (!options.lang) {
             langsList.forEach(({ title, value }) => {
@@ -165,6 +186,7 @@ Options:
             langListOut.splice(1, 0, "Enter custom");
           }
           spinner.stop();
+          /** @type {{langChoice?: string, customLang?: string, removeJquery?: boolean}} */
           const { langChoice, customLang, removeJquery } =
             await inquirer.prompt([
               {
@@ -172,7 +194,10 @@ Options:
                 name: "langChoice",
                 message: "Select language",
                 when: !options.lang,
-                source: async (answers, input = "") =>
+                source: async (
+                  /** @type {Record<string, unknown>} */ answers,
+                  input = "",
+                ) =>
                   fuzzy
                     .filter(input, langListOut)
                     .map(({ original }) => original),
@@ -181,7 +206,7 @@ Options:
                 type: "input",
                 name: "customLang",
                 message: "Enter custom language code",
-                when: ({ langChoice }) =>
+                when: (/** @type {{langChoice?: string}} */ { langChoice }) =>
                   !options.lang && langChoice === langListOut[1],
               },
               {
@@ -194,7 +219,11 @@ Options:
             ]);
           spinner.start();
           return {
-            lang: options.lang || langListMap[langChoice] || customLang || "",
+            lang:
+              options.lang ||
+              (langChoice && langListMap[langChoice]) ||
+              customLang ||
+              "",
             removeJquery: removeJquery !== undefined ? removeJquery : false,
           };
         },
@@ -203,7 +232,16 @@ Options:
         ` ${result.nameWithVersion} copied to ${destination} in ${timerDownloaded}. Have fun!`,
       );
     } catch (error) {
-      if (error.code === "ETARGET") {
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        error.code === "ETARGET" &&
+        "wanted" in error &&
+        typeof error.wanted === "string" &&
+        "versions" in error &&
+        Array.isArray(error.versions) &&
+        error.versions.every((version) => typeof version === "string")
+      ) {
         const message = chalk.red(
           `version '${error.wanted}' not found in npm registry\navailable versions:\n`,
         );
@@ -215,9 +253,14 @@ Options:
       throw error;
     }
   } catch (error) {
-    console.error(
-      `Error: ${error.code ? `${error.code}: ` : ""}${error.message}`,
-    );
+    const message = error instanceof Error ? error.message : String(error);
+    const code =
+      error instanceof Error &&
+      "code" in error &&
+      typeof error.code === "string"
+        ? `${error.code}: `
+        : "";
+    console.error(`Error: ${code}${message}`);
     process.exitCode = 1;
   }
 }

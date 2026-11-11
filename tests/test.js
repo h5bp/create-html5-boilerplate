@@ -17,12 +17,13 @@ import path from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import inquirer from "inquirer";
 import ssri from "ssri";
 import * as tar from "tar";
 import { generate } from "../src/generator.js";
 
 // Register the CLI as a dependency so test watch mode reruns on source changes.
-import "../src/cli.js";
+import { runCli as runCliInProcess } from "../src/cli.js";
 
 const execFileAsync = promisify(execFile);
 const entry = fileURLToPath(new URL("../index.js", import.meta.url));
@@ -378,6 +379,68 @@ test("applies an explicit language", async (t) => {
   const html = await readFile(path.join(work.cwd, "site/index.html"), "utf8");
   assert.ok(html.includes('lang="en-US"'));
   await assertStagingRemoved(work.tmp);
+});
+
+test("evaluates release-specific configuration prompts", async (t) => {
+  const work = await workspace(t);
+  const fixture = path.join(work.cwd, "fixture");
+  await mkdir(path.join(fixture, "package", "dist"), { recursive: true });
+  await writeFile(
+    path.join(fixture, "package", "dist", "index.html"),
+    '<html lang="en"><script src="jquery.js"></script></html>',
+  );
+  const archive = path.join(fixture, "fixture.tgz");
+  await tar.create({ gzip: true, cwd: fixture, file: archive }, ["package"]);
+  const bytes = await readFile(archive);
+  const dist = {
+    tarball: "https://example.test/fixture.tgz",
+    integrity: ssri.fromData(bytes).toString(),
+  };
+  t.mock.method(os, "tmpdir", () => work.tmp);
+  t.mock.method(globalThis, "fetch", async (url) =>
+    String(url).endsWith("/html5-boilerplate")
+      ? Response.json({
+          name: "html5-boilerplate",
+          "dist-tags": { latest: "8.0.0" },
+          versions: Object.fromEntries(
+            ["7.3.0", "8.0.0"].map((version) => [
+              version,
+              { name: "html5-boilerplate", version, dist },
+            ]),
+          ),
+        })
+      : new Response(bytes),
+  );
+  t.mock.method(console, "log", () => {});
+  const errors = t.mock.method(console, "error", () => {});
+  let removeJqueryWhen;
+  t.mock.method(inquirer, "prompt", async (questions) => {
+    removeJqueryWhen = questions.find(
+      (question) => question.name === "removeJquery",
+    ).when;
+    return { removeJquery: Boolean(removeJqueryWhen) };
+  });
+
+  for (const [version, expected] of [
+    ["7.3.0", -1],
+    ["8.0.0", 0],
+    ["latest", false],
+  ]) {
+    const destination = path.join(work.cwd, `site-${version}`);
+    await runCliInProcess([
+      "node",
+      entry,
+      destination,
+      "--lang=fr",
+      `--release=${version}`,
+    ]);
+    assert.equal(removeJqueryWhen, expected);
+    const html = await readFile(path.join(destination, "index.html"), "utf8");
+    assert.match(html, /lang="fr"/);
+    assert.equal(html.includes("jquery.js"), !expected);
+    await assertStagingRemoved(work.tmp);
+  }
+  assert.equal(errors.mock.callCount(), 0);
 });
 
 test("accepts positional targets and release aliases", async (t) => {

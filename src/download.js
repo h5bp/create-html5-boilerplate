@@ -1,3 +1,4 @@
+// @ts-check
 import { createWriteStream } from "node:fs";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
@@ -8,6 +9,14 @@ import * as tar from "tar";
 const timeout = 15_000;
 const headers = { "User-Agent": "create-html5-boilerplate" };
 
+/**
+ * @template T
+ * @param {string | URL} url
+ * @param {string} description
+ * @param {(response: Response, signal: AbortSignal) => Promise<T>} consume
+ * @param {Record<string, string>} [extraHeaders]
+ * @returns {Promise<T>}
+ */
 async function request(url, description, consume, extraHeaders = {}) {
   const signal = AbortSignal.timeout(timeout);
   try {
@@ -25,8 +34,8 @@ async function request(url, description, consume, extraHeaders = {}) {
   } catch (error) {
     if (
       signal.aborted ||
-      error.name === "AbortError" ||
-      error.name === "TimeoutError"
+      (error instanceof Error &&
+        (error.name === "AbortError" || error.name === "TimeoutError"))
     ) {
       throw new Error(
         `${description}: Network request timed out or was aborted. Please check your internet connection or proxy settings.`,
@@ -46,6 +55,12 @@ async function request(url, description, consume, extraHeaders = {}) {
   }
 }
 
+/**
+ * @param {string} version
+ * @param {string} staging
+ * @param {string} archive
+ * @returns {Promise<string>}
+ */
 export async function downloadRelease(version, staging, archive) {
   const registry =
     process.env.npm_config_registry || "https://registry.npmjs.org/";
@@ -58,7 +73,9 @@ export async function downloadRelease(version, staging, archive) {
     "Failed to fetch release metadata",
     async (response) => {
       try {
-        return await response.json();
+        return /** @type {import("npm-pick-manifest").PackageMetadata} */ (
+          await response.json()
+        );
       } catch (error) {
         if (error instanceof SyntaxError) {
           throw new Error(
@@ -81,8 +98,8 @@ export async function downloadRelease(version, staging, archive) {
     );
   }
   const expectedIntegrity =
-    integrity || ssri.fromHex(shasum, "sha1").toString();
-  if (!ssri.parse(expectedIntegrity)) {
+    integrity || (shasum && ssri.fromHex(shasum, "sha1").toString());
+  if (!expectedIntegrity || !ssri.parse(expectedIntegrity)) {
     throw new Error(
       `Invalid archive integrity for html5-boilerplate@${manifest.version}`,
     );

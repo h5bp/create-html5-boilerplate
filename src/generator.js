@@ -1,9 +1,37 @@
+// @ts-check
 import * as fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import glob from "fast-glob";
 import { downloadRelease } from "./download.js";
 
+/**
+ * @typedef {Object} Configuration
+ * @property {string} [lang] HTML language code.
+ * @property {boolean} [removeJquery] Remove jQuery scripts from the generated HTML.
+ */
+
+/**
+ * @typedef {Object} GenerateResult
+ * @property {string} destination Destination directory.
+ * @property {string} nameWithVersion Requested package and version.
+ */
+
+/**
+ * @typedef {Configuration & {
+ *   destination: string,
+ *   version?: string,
+ *   skipConfiguration?: boolean,
+ *   onCopied?: (result: GenerateResult) => void | Promise<void>,
+ *   getConfiguration?: () => Configuration | Promise<Configuration>
+ * }} GenerateOptions
+ */
+
+/**
+ * Scaffold a project from a published HTML5 Boilerplate release.
+ * @param {GenerateOptions} options
+ * @returns {Promise<GenerateResult>}
+ */
 export async function generate({
   destination,
   version = "latest",

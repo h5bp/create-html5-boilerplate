@@ -119,8 +119,11 @@ Tests use the [Node.js test runner](https://nodejs.org/api/test.html). Integrati
 tests download published HTML5 Boilerplate versions from the npm registry and
 use isolated temporary directories to run in parallel.
 
-Run `npm test`, `npm run test:watch`, or `npm run coverage`. Run `npm run lint`
-and `npm run format:check` to check the code, or `npm run format` to format it.
+Run `npm test`, `npm run test:watch`, or `npm run coverage`. `npm test` runs
+strict JavaScript type checking before the tests; run `npm run typecheck` to
+check types independently. This is a no-emit check: the source remains vanilla
+JavaScript and runs directly in Node.js. Run `npm run lint` and
+`npm run format:check` to check the code, or `npm run format` to format it.
 `npm run prepare` installs the Husky hook for formatting staged files.
 
 ### Dependency upgrade notes
