@@ -1,3 +1,6 @@
+import { readFile } from "node:fs/promises";
+import { parseArgs } from "node:util";
+
 export async function runCli(argv = process.argv) {
   if (Number(process.versions.node.split(".")[0]) < 20) {
     console.error("Node.js 20 or higher is required.");
@@ -5,10 +8,83 @@ export async function runCli(argv = process.argv) {
     return;
   }
 
+  let parsed;
+  try {
+    let afterTerminator = false;
+    const args = argv.slice(2).flatMap((arg) => {
+      if (arg === "--") afterTerminator = true;
+      // The old parser treated explicit --yes values as non-boolean strings.
+      if (!afterTerminator && /^(--yes|-y)=/.test(arg)) return ["--no-yes"];
+      const shortRelease = !afterTerminator && /^-([a-zA-Z]*)r=(.*)$/.exec(arg);
+      if (!shortRelease) return [arg];
+      const [, precedingFlags, value] = shortRelease;
+      return [
+        ...(precedingFlags ? [`-${precedingFlags}`] : []),
+        `--release=${value}`,
+      ];
+    });
+    parsed = parseArgs({
+      args,
+      allowPositionals: true,
+      strict: true,
+      tokens: true,
+      options: {
+        help: { type: "boolean", short: "h" },
+        version: { type: "boolean", short: "v" },
+        release: { type: "string", short: "r" },
+        yes: { type: "boolean", short: "y" },
+        "no-yes": { type: "boolean" },
+        lang: { type: "string" },
+      },
+    });
+  } catch (error) {
+    if (
+      !(error instanceof TypeError) ||
+      !error.code?.startsWith("ERR_PARSE_ARGS_")
+    ) {
+      throw error;
+    }
+    console.error(`Error: ${error.message}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  const { values: options, positionals, tokens } = parsed;
+  const yesToken = tokens.findLast(
+    (token) =>
+      token.kind === "option" &&
+      (token.name === "yes" || token.name === "no-yes"),
+  );
+  const yes = yesToken?.name === "yes";
+
+  if (options.help) {
+    console.log(`Usage: create-html5-boilerplate [target-directory] [options]
+
+Options:
+  -h, --help             Show help
+  -v, --version          Show version
+  -r, --release <value>  HTML5 Boilerplate release (default: latest)
+  -y, --yes              Skip prompts
+      --lang <value>     Set the HTML language`);
+    return;
+  }
+
+  if (options.version) {
+    try {
+      const packageJson = JSON.parse(
+        await readFile(new URL("../package.json", import.meta.url), "utf8"),
+      );
+      console.log(packageJson.version);
+    } catch (error) {
+      console.error(error);
+      process.exitCode = 1;
+    }
+    return;
+  }
+
   try {
     const [
       { default: path },
-      { default: yargsParser },
       { default: chalk },
       { default: inquirer },
       { default: fuzzy },
@@ -20,7 +96,6 @@ export async function runCli(argv = process.argv) {
       { generate },
     ] = await Promise.all([
       import("path"),
-      import("yargs-parser"),
       import("chalk"),
       import("inquirer"),
       import("fuzzy"),
@@ -33,14 +108,11 @@ export async function runCli(argv = process.argv) {
     ]);
 
     inquirer.registerPrompt("autocomplete", inquirerAutocompletePrompt);
-    const options = yargsParser(argv.slice(2), {
-      alias: { release: ["r"], yes: ["y"] },
-    });
     const timer = elapsed.start();
-    const version = (options.release || "latest").toString();
-    const destination = path.resolve(process.cwd(), options._[0] || "./");
+    const version = options.release || "latest";
+    const destination = path.resolve(process.cwd(), positionals[0] || "./");
 
-    if ((await fs.pathExists(destination)) && options.yes !== true) {
+    if ((await fs.pathExists(destination)) && !yes) {
       const folderFiles = await fs.readdir(destination);
       if (folderFiles.length !== -1) {
         const { override } = await inquirer.prompt({
@@ -64,7 +136,7 @@ export async function runCli(argv = process.argv) {
       const result = await generate({
         destination,
         version,
-        skipConfiguration: options.yes === true,
+        skipConfiguration: yes,
         onCopied: () => {
           timerDownloaded = timer.get();
           console.log(destination);

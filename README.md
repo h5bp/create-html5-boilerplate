@@ -71,6 +71,10 @@ npm install
 npm start
 ```
 
+Use `--release` (or `-r`) to select a release, `--lang` to set the HTML
+language, and `--yes` (or `-y`) to skip prompts. Run with `--help` (or `-h`)
+for usage, or `--version` (or `-v`) for the CLI version.
+
 ## Programmatic Usage
 
 ```js
@@ -122,7 +126,7 @@ Node 22 and 24 patch releases than this project's minimum. The unused direct
 replaces Airbnb's legacy configuration with the recommended ESLint and import
 rules plus Prettier; it does not preserve every Airbnb rule.
 
-Further major upgrades of Chalk, Ora, and yargs-parser should be reviewed for
+Further major upgrades of Chalk and Ora should be reviewed for
 API and output changes. Inquirer is intentionally kept at 9 because
 `inquirer-autocomplete-prompt` requires it; upgrading requires a prompt migration.
 `fuzzy`, `elapsed-time-logger`, and the autocomplete prompt have not had recent

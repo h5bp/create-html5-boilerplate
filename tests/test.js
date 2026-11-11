@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFile } from "node:child_process";
+import { execFile, spawnSync } from "node:child_process";
 import { mkdtemp, mkdir, readFile, readdir, rm, stat } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -148,6 +148,127 @@ test("applies an explicit language", async (t) => {
   await runCli(work, ["site", "--lang=en-US"]);
   const html = await readFile(path.join(work.cwd, "site/index.html"), "utf8");
   assert.ok(html.includes('lang="en-US"'));
+  await assertStagingRemoved(work.tmp);
+});
+
+test("accepts positional targets and release aliases", async (t) => {
+  for (const releaseArgs of [
+    ["--release", "7.3.0", "--yes"],
+    ["-r", "7.3.0", "-y"],
+    ["-yr=7.3.0"],
+  ]) {
+    await t.test(releaseArgs.join(" "), async (t) => {
+      const work = await workspace(t);
+      const { stdout, stderr } = await runCli(work, [
+        "my-site",
+        ...releaseArgs,
+      ]);
+      assert.equal(stdout.trim(), path.join(work.cwd, "my-site"));
+      assert.match(stderr, /html5-boilerplate@7\.3\.0 copied to/);
+      await stat(path.join(work.cwd, "my-site/index.html"));
+      await assertStagingRemoved(work.tmp);
+    });
+  }
+});
+
+test("treats arguments after -- as positional targets", async (t) => {
+  const work = await workspace(t);
+  const target = path.join(work.cwd, "-r=site");
+  const { stdout, stderr } = await runCli(work, [
+    "--release=7.3.0",
+    "-y",
+    "--",
+    "-r=site",
+  ]);
+  assert.equal(stdout.trim(), target);
+  assert.match(stderr, /html5-boilerplate@7\.3\.0 copied to/);
+  await stat(path.join(target, "index.html"));
+  await assertStagingRemoved(work.tmp);
+});
+
+test("--no-yes overrides --yes and restores the existing-directory prompt", async (t) => {
+  const work = await workspace(t);
+  await mkdir(path.join(work.cwd, "my-site"));
+  const result = spawnSync(
+    process.execPath,
+    [entry, "my-site", "--yes", "--no-yes"],
+    {
+      cwd: work.cwd,
+      input: "n\n",
+      encoding: "utf8",
+      env: { ...process.env, TMPDIR: work.tmp, NO_COLOR: "1" },
+    },
+  );
+  assert.ifError(result.error);
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /is not an empty folder, proceed\?/);
+  assert.match(result.stdout, /Aborted/);
+  assert.deepEqual(await readdir(path.join(work.cwd, "my-site")), []);
+  await assertStagingRemoved(work.tmp);
+});
+
+test("explicit yes values do not skip prompts", async (t) => {
+  const work = await workspace(t);
+  await mkdir(path.join(work.cwd, "my-site"));
+  for (const flag of ["--yes=false", "--yes=true", "-y=false"]) {
+    const result = spawnSync(process.execPath, [entry, "my-site", flag], {
+      cwd: work.cwd,
+      input: "n\n",
+      encoding: "utf8",
+      env: { ...process.env, TMPDIR: work.tmp, NO_COLOR: "1" },
+    });
+    assert.ifError(result.error);
+    assert.equal(result.status, 0);
+    assert.match(result.stdout, /is not an empty folder, proceed\?/);
+    assert.match(result.stdout, /Aborted/);
+  }
+  assert.deepEqual(await readdir(path.join(work.cwd, "my-site")), []);
+  await assertStagingRemoved(work.tmp);
+});
+
+test("help and version flags exit without generating a project", async (t) => {
+  const work = await workspace(t);
+  const { version } = JSON.parse(
+    await readFile(new URL("../package.json", import.meta.url), "utf8"),
+  );
+  for (const flag of ["--help", "-h", "--version", "-v"]) {
+    const { stdout, stderr } = await runCli(work, ["my-site", flag]);
+    if (flag === "--help" || flag === "-h") {
+      assert.match(stdout, /Usage: create-html5-boilerplate/);
+      assert.match(stdout, /--release/);
+    } else {
+      assert.equal(stdout.trim(), version);
+    }
+    assert.equal(stderr, "");
+  }
+  await assert.rejects(stat(path.join(work.cwd, "my-site")), {
+    code: "ENOENT",
+  });
+  await assertStagingRemoved(work.tmp);
+});
+
+test("invalid arguments fail cleanly before generating a project", async (t) => {
+  const work = await workspace(t);
+  for (const args of [
+    ["my-site", "--unknown"],
+    ["my-site", "-z"],
+    ["my-site", "--release"],
+    ["my-site", "-r"],
+    ["my-site", "--release", "-y"],
+    ["my-site", "--lang"],
+    ["my-site", "--help=invalid"],
+  ]) {
+    await assert.rejects(runCli(work, args), (error) => {
+      assert.equal(error.code, 1);
+      assert.equal(error.stdout, "");
+      assert.match(error.stderr, /^Error: /);
+      assert.doesNotMatch(error.stderr, /\n\s+at /);
+      return true;
+    });
+  }
+  await assert.rejects(stat(path.join(work.cwd, "my-site")), {
+    code: "ENOENT",
+  });
   await assertStagingRemoved(work.tmp);
 });
 
