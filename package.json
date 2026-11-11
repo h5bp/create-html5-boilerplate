@@ -16,7 +16,7 @@
   "main": "index.js",
   "type": "module",
   "engines": {
-    "node": ">=22.13.0"
+    "node": ">=20.0.0"
   },
   "bin": {
     "create-html5-boilerplate": "./index.js"

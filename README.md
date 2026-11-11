@@ -43,8 +43,8 @@ These commands are equivalent and do the following:
 
 ## Requirements
 
-`create-html5-boilerplate` is cross-platform and requires Node.js 22.13.0 or
-newer. Node.js 22, 24 and 26 are tested in CI. You can also install the project
+`create-html5-boilerplate` is cross-platform and requires Node.js 20.0.0 or
+newer. Node.js 20, 22 and 24 are tested in CI. You can also install the project
 globally:
 
 ```

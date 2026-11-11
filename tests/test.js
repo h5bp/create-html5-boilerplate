@@ -133,6 +133,24 @@ test("applies an explicit language", async (t) => {
   await assertStagingRemoved(work.tmp);
 });
 
+test("the published entry point rejects unsupported Node.js versions", async () => {
+  const entry = new URL("../index.js", import.meta.url).href;
+  for (const version of ["14.0.0", "16.0.0", "18.0.0", "19.9.0"]) {
+    await assert.rejects(
+      execFileAsync(process.execPath, [
+        "--input-type=module",
+        "-e",
+        `Object.defineProperty(process.versions, "node", { value: "${version}" }); await import(${JSON.stringify(entry)});`,
+      ]),
+      (error) => {
+        assert.equal(error.code, 1);
+        assert.match(error.stderr, /Node\.js 20 or higher is required/);
+        return true;
+      },
+    );
+  }
+});
+
 test("the published entry point downloads a release", async (t) => {
   const work = await workspace(t);
   const entry = new URL("../index.js", import.meta.url);
