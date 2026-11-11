@@ -13,7 +13,7 @@
   },
   "license": "MIT",
   "author": "@h5bp",
-  "main": "index.js",
+  "main": "src/generator.js",
   "type": "module",
   "engines": {
     "node": ">=20.0.0"
@@ -25,13 +25,14 @@
     "test": "node --test",
     "test:watch": "node --test --watch",
     "lint": "eslint .",
-    "format": "prettier --write index.js lib/cli.js tests/*.js eslint.config.js package.json .github/workflows/*.yml",
-    "format:check": "prettier --check index.js lib/cli.js tests/*.js eslint.config.js package.json .github/workflows/*.yml",
-    "coverage": "node --test --experimental-test-coverage --test-coverage-include=lib/cli.js",
+    "format": "prettier --write index.js src/*.js tests/*.js eslint.config.js package.json .github/workflows/*.yml",
+    "format:check": "prettier --check index.js src/*.js tests/*.js eslint.config.js package.json .github/workflows/*.yml",
+    "coverage": "node --test --experimental-test-coverage --test-coverage-include='src/*.js'",
     "prepare": "husky"
   },
   "files": [
     "lib/**/*",
+    "src/**/*",
     "license.txt",
     "index.js",
     "README.md"

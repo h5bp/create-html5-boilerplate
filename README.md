@@ -71,6 +71,17 @@ npm install
 npm start
 ```
 
+## Programmatic Usage
+
+```js
+import { generate } from "create-html5-boilerplate";
+
+await generate({ destination: "/path/to/site", version: "7.3.0", lang: "en" });
+```
+
+`version` defaults to `latest`. The optional `lang` and `removeJquery` options
+configure the generated HTML without prompting.
+
 ## CONTRIBUTING
 
 ### Setting Up a Local Copy

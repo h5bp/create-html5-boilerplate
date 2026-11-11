@@ -6,21 +6,13 @@ import path from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import "../src/generator.js";
 
 // Register the CLI as a dependency so test watch mode reruns on source changes.
-import "../lib/cli.js";
+import "../src/cli.js";
 
 const execFileAsync = promisify(execFile);
-const cliUrl = new URL("../lib/cli.js", import.meta.url).href;
-const runner = `
-  const { default: cli } = await import(process.argv[1]);
-  try {
-    await cli(process.argv.slice(2));
-  } catch (error) {
-    console.error("CLI_ERROR:", error);
-    process.exitCode = 1;
-  }
-`;
+const entry = fileURLToPath(new URL("../index.js", import.meta.url));
 const versions = [
   null,
   "-r=latest",
@@ -54,14 +46,10 @@ async function workspace(t) {
 }
 
 async function runCli({ cwd, tmp }, args) {
-  return execFileAsync(
-    process.execPath,
-    ["--input-type=module", "-e", runner, cliUrl, ...args],
-    {
-      cwd,
-      env: { ...process.env, TMPDIR: tmp, TMP: tmp, TEMP: tmp, NO_COLOR: "1" },
-    },
-  );
+  return execFileAsync(process.execPath, [entry, ...args], {
+    cwd,
+    env: { ...process.env, TMPDIR: tmp, TMP: tmp, TEMP: tmp, NO_COLOR: "1" },
+  });
 }
 
 async function assertStagingRemoved(tmp) {
@@ -69,6 +57,36 @@ async function assertStagingRemoved(tmp) {
     code: "ENOENT",
   });
 }
+
+test("generates independently of CLI arguments", async (t) => {
+  const work = await workspace(t);
+  const destination = path.join(work.cwd, "api-site");
+  const generatorUrl = new URL("../src/generator.js", import.meta.url).href;
+  const script = `
+    const destination = process.argv[1];
+    process.argv = ["node", "unrelated-command", "--release=invalid"];
+    const { generate } = await import(${JSON.stringify(generatorUrl)});
+    const result = await generate({ destination, version: "7.3.0", lang: "fr" });
+    console.log(JSON.stringify({ result, argv: process.argv }));
+  `;
+  const { stdout, stderr } = await execFileAsync(
+    process.execPath,
+    ["--input-type=module", "-e", script, destination],
+    {
+      env: { ...process.env, TMPDIR: work.tmp, TMP: work.tmp, TEMP: work.tmp },
+    },
+  );
+  const { result, argv } = JSON.parse(stdout);
+  assert.equal(result.destination, destination);
+  assert.match(result.nameWithVersion, /html5-boilerplate@7\.3\.0/);
+  assert.match(
+    await readFile(path.join(destination, "index.html"), "utf8"),
+    /lang="fr"/,
+  );
+  assert.deepEqual(argv, ["node", "unrelated-command", "--release=invalid"]);
+  assert.equal(stderr, "");
+  await assertStagingRemoved(work.tmp);
+});
 
 test("downloads supported releases", { concurrency: 4 }, async (t) => {
   await Promise.all(
@@ -106,8 +124,8 @@ test(
   async (t) => {
     await Promise.all(
       [
-        ["-r=6..2.3", /CLI_ERROR: ETARGET/],
-        ["-r=6..2.3,7.2.3", /CLI_ERROR: Error:/],
+        ["-r=6..2.3", /ETARGET/],
+        ["-r=6..2.3,7.2.3", /Error:/],
       ].map(([version, message]) =>
         t.test(version, async (t) => {
           const work = await workspace(t);
