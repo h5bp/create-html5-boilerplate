@@ -17,7 +17,8 @@ import path from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import pacote from "pacote";
+import ssri from "ssri";
+import * as tar from "tar";
 import { generate } from "../src/generator.js";
 
 // Register the CLI as a dependency so test watch mode reruns on source changes.
@@ -76,32 +77,57 @@ async function assertStagingRemoved(tmp) {
 test("copies all staged files with their contents and permissions", async (t) => {
   const work = await workspace(t);
   const destination = path.join(work.cwd, "nested", "site");
+  t.mock.method(os, "tmpdir", () => work.tmp);
   await mkdir(destination, { recursive: true });
   await writeFile(path.join(destination, "index.html"), "old");
   await chmod(path.join(destination, "index.html"), 0o600);
   await writeFile(path.join(destination, "keep.txt"), "keep");
-  let staging;
   let copied = false;
+  let staging;
   const files = {
     "index.html": '<html lang="en">fixture</html>\n',
     ".npmignore": "node_modules\n",
     "assets/.npmignore": "generated\n",
     "assets/script.js": "console.log('fixture');\n",
   };
-  t.mock.method(pacote, "extract", async (spec, dir) => {
-    assert.equal(spec, "html5-boilerplate@fixture");
-    staging = dir;
-    for (const [name, content] of Object.entries(files)) {
-      const file = path.join(dir, "dist", name);
-      await mkdir(path.dirname(file), { recursive: true });
-      await writeFile(file, content);
+  const fixture = path.join(work.cwd, "fixture");
+  for (const [name, content] of Object.entries(files)) {
+    const file = path.join(fixture, "package", "dist", name);
+    await mkdir(path.dirname(file), { recursive: true });
+    await writeFile(file, content);
+  }
+  await chmod(path.join(fixture, "package", "dist", "index.html"), 0o644);
+  await chmod(
+    path.join(fixture, "package", "dist", "assets", "script.js"),
+    0o755,
+  );
+  if (process.platform !== "win32") {
+    await symlink(
+      "script.js",
+      path.join(fixture, "package", "dist", "assets", "link.js"),
+    );
+  }
+  const archive = path.join(fixture, "fixture.tgz");
+  await tar.create({ gzip: true, cwd: fixture, file: archive }, ["package"]);
+  const bytes = await readFile(archive);
+  t.mock.method(globalThis, "fetch", async (url) => {
+    if (String(url).endsWith("/html5-boilerplate")) {
+      return Response.json({
+        name: "html5-boilerplate",
+        "dist-tags": { fixture: "1.0.0" },
+        versions: {
+          "1.0.0": {
+            name: "html5-boilerplate",
+            version: "1.0.0",
+            dist: {
+              tarball: "https://example.test/fixture.tgz",
+              integrity: ssri.fromData(bytes).toString(),
+            },
+          },
+        },
+      });
     }
-    await chmod(path.join(dir, "dist", "index.html"), 0o644);
-    await chmod(path.join(dir, "dist", "assets", "script.js"), 0o755);
-    if (process.platform !== "win32") {
-      await symlink("script.js", path.join(dir, "dist", "assets", "link.js"));
-    }
-    return { from: spec };
+    return new Response(bytes);
   });
 
   await generate({
@@ -110,8 +136,11 @@ test("copies all staged files with their contents and permissions", async (t) =>
     skipConfiguration: true,
     onCopied: async () => {
       copied = true;
+      const directories = await readdir(work.tmp);
+      assert.equal(directories.length, 1);
+      staging = path.join(work.tmp, directories[0]);
       for (const [name, content] of Object.entries(files)) {
-        const source = path.join(staging, "dist", name);
+        const source = path.join(staging, "package", "dist", name);
         const target = path.join(destination, name);
         assert.deepEqual(await readFile(target), Buffer.from(content));
         if (process.platform !== "win32") {
@@ -324,7 +353,7 @@ test(
   async (t) => {
     await Promise.all(
       [
-        ["-r=6..2.3", /ETARGET/],
+        ["-r=6..2.3", /not found in npm registry/],
         ["-r=6..2.3,7.2.3", /Error:/],
       ].map(([version, message]) =>
         t.test(version, async (t) => {

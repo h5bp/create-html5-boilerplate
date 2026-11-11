@@ -208,13 +208,16 @@ Options:
           `version '${error.wanted}' not found in npm registry\navailable versions:\n`,
         );
         spinner.fail(message + error.versions.reverse().join(" | "));
-        throw error.code;
+        process.exitCode = 1;
+        return;
       }
       spinner.fail(`Could not generate project at ${destination}`);
       throw error;
     }
   } catch (error) {
-    console.error(error);
+    console.error(
+      `Error: ${error.code ? `${error.code}: ` : ""}${error.message}`,
+    );
     process.exitCode = 1;
   }
 }

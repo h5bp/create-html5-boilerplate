@@ -74,6 +74,11 @@ npm start
 Use `--release` (or `-r`) to select a release, `--lang` to set the HTML
 language, and `--yes` (or `-y`) to skip prompts. Run with `--help` (or `-h`)
 for usage, or `--version` (or `-v`) for the CLI version.
+Release metadata and archives are downloaded from the npm registry using Node's
+native fetch, with a 15-second timeout per request and archive integrity checks.
+The `npm_config_registry` environment variable can select a different registry.
+Unlike npm's HTTP client, native fetch does not automatically use npm's proxy
+settings; configure proxy support for the Node.js version in use if needed.
 
 ## Programmatic Usage
 
@@ -110,9 +115,9 @@ npm start
 
 ### Tests
 
-Tests use the [Node.js test runner](https://nodejs.org/api/test.html) and are
-located in `tests/test.js`. They download published HTML5 Boilerplate versions
-from the npm registry and use isolated temporary directories to run in parallel.
+Tests use the [Node.js test runner](https://nodejs.org/api/test.html). Integration
+tests download published HTML5 Boilerplate versions from the npm registry and
+use isolated temporary directories to run in parallel.
 
 Run `npm test`, `npm run test:watch`, or `npm run coverage`. Run `npm run lint`
 and `npm run format:check` to check the code, or `npm run format` to format it.
@@ -120,9 +125,7 @@ and `npm run format:check` to check the code, or `npm run format` to format it.
 
 ### Dependency upgrade notes
 
-The `pacote` upgrade from 17 to 21 is a major change; version 22 requires newer
-Node 22 and 24 patch releases than this project's minimum. The unused direct
-`npm` dependency and Jest runner were removed. The flat ESLint configuration
+The unused direct `npm` dependency and Jest runner were removed. The flat ESLint configuration
 replaces Airbnb's legacy configuration with the recommended ESLint and import
 rules plus Prettier; it does not preserve every Airbnb rule.
 
@@ -133,7 +136,5 @@ API and output changes. Inquirer is intentionally kept at 9 because
 releases and should be evaluated for replacement separately to avoid changing
 CLI behavior in this baseline update.
 
-The production dependency audit on November 10, 2026 reported 15 moderate and
-one high advisory, including transitive dependencies of `pacote` and `picomatch`.
-Run `npm audit --omit=dev` for current details; further remediation needs review
-against the supported Node versions and CLI compatibility.
+Run `npm audit --omit=dev` for current production dependency advisories; further
+remediation needs review against the supported Node versions and CLI compatibility.

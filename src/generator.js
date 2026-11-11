@@ -1,8 +1,8 @@
 import * as fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import pacote from "pacote";
 import glob from "fast-glob";
+import { downloadRelease } from "./download.js";
 
 export async function generate({
   destination,
@@ -17,12 +17,14 @@ export async function generate({
     path.join(os.tmpdir(), "html5-boilerplate-staging-"),
   );
   try {
-    const { from: nameWithVersion } = await pacote.extract(
-      `html5-boilerplate@${version}`,
-      tempDir,
-      {},
+    const extractedDir = path.join(tempDir, "package");
+    await fs.mkdir(extractedDir);
+    const nameWithVersion = await downloadRelease(
+      version,
+      extractedDir,
+      path.join(tempDir, "archive.tgz"),
     );
-    await fs.cp(path.join(tempDir, "dist"), destination, {
+    await fs.cp(path.join(extractedDir, "dist"), destination, {
       recursive: true,
       force: true,
       verbatimSymlinks: true,
