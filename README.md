@@ -43,8 +43,8 @@ These commands are equivalent and do the following:
 
 ## Requirements
 
-`create-html5-boilerplate` is cross-platform and requires Node.js 22.13.0 or
-newer. Node.js 22, 24 and 26 are tested in CI. You can also install the project
+`create-html5-boilerplate` is cross-platform and requires Node.js 20.0.0 or
+newer. Node.js 20, 22 and 24 are tested in CI. You can also install the project
 globally:
 
 ```
@@ -71,6 +71,29 @@ npm install
 npm start
 ```
 
+Use `--release` (or `-r`) to select a release, `--lang` to set the HTML
+language, and `--yes` (or `-y`) to skip prompts. Run with `--help` (or `-h`)
+for usage, or `--version` (or `-v`) for the CLI version.
+Errors include context and suggestions without stack traces. Use `--debug` or
+set the `DEBUG` environment variable to show diagnostic details and stack
+traces; these details may contain local paths or other sensitive information.
+Release metadata and archives are downloaded from the npm registry using Node's
+native fetch, with a 15-second timeout per request and archive integrity checks.
+The `npm_config_registry` environment variable can select a different registry.
+Unlike npm's HTTP client, native fetch does not automatically use npm's proxy
+settings; configure proxy support for the Node.js version in use if needed.
+
+## Programmatic Usage
+
+```js
+import { generate } from "create-html5-boilerplate";
+
+await generate({ destination: "/path/to/site", version: "7.3.0", lang: "en" });
+```
+
+`version` defaults to `latest`. The optional `lang` and `removeJquery` options
+configure the generated HTML without prompting.
+
 ## CONTRIBUTING
 
 ### Setting Up a Local Copy
@@ -95,30 +118,29 @@ npm start
 
 ### Tests
 
-Tests use the [Node.js test runner](https://nodejs.org/api/test.html) and are
-located in `tests/test.js`. They download published HTML5 Boilerplate versions
-from the npm registry and use isolated temporary directories to run in parallel.
+Tests use the [Node.js test runner](https://nodejs.org/api/test.html). Integration
+tests download published HTML5 Boilerplate versions from the npm registry and
+use isolated temporary directories to run in parallel.
 
-Run `npm test`, `npm run test:watch`, or `npm run coverage`. Run `npm run lint`
-and `npm run format:check` to check the code, or `npm run format` to format it.
+Run `npm test`, `npm run test:watch`, or `npm run coverage`. `npm test` runs
+strict JavaScript type checking before the tests; run `npm run typecheck` to
+check types independently. This is a no-emit check: the source remains vanilla
+JavaScript and runs directly in Node.js. Run `npm run lint` and
+`npm run format:check` to check the code, or `npm run format` to format it.
 `npm run prepare` installs the Husky hook for formatting staged files.
 
 ### Dependency upgrade notes
 
-The `pacote` upgrade from 17 to 21 is a major change; version 22 requires newer
-Node 22 and 24 patch releases than this project's minimum. The unused direct
-`npm` dependency and Jest runner were removed. The flat ESLint configuration
+The unused direct `npm` dependency and Jest runner were removed. The flat ESLint configuration
 replaces Airbnb's legacy configuration with the recommended ESLint and import
 rules plus Prettier; it does not preserve every Airbnb rule.
 
-Further major upgrades of Chalk, Ora, and yargs-parser should be reviewed for
+Further major upgrades of Chalk and Ora should be reviewed for
 API and output changes. Inquirer is intentionally kept at 9 because
 `inquirer-autocomplete-prompt` requires it; upgrading requires a prompt migration.
 `fuzzy`, `elapsed-time-logger`, and the autocomplete prompt have not had recent
 releases and should be evaluated for replacement separately to avoid changing
 CLI behavior in this baseline update.
 
-The production dependency audit on November 10, 2026 reported 15 moderate and
-one high advisory, including transitive dependencies of `pacote` and `picomatch`.
-Run `npm audit --omit=dev` for current details; further remediation needs review
-against the supported Node versions and CLI compatibility.
+Run `npm audit --omit=dev` for current production dependency advisories; further
+remediation needs review against the supported Node versions and CLI compatibility.
