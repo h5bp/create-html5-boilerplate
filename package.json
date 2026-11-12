@@ -28,7 +28,7 @@
     "lint": "eslint .",
     "format": "prettier --write index.js src/*.js src/*.d.ts tests/*.js eslint.config.js package.json tsconfig.json .github/workflows/*.yml",
     "format:check": "prettier --check index.js src/*.js src/*.d.ts tests/*.js eslint.config.js package.json tsconfig.json .github/workflows/*.yml",
-    "coverage": "node --test --experimental-test-coverage --test-coverage-include='src/*.js'",
+    "coverage": "node --test --experimental-test-coverage --test-coverage-include=\"src/*.js\"",
     "prepare": "husky"
   },
   "files": [
