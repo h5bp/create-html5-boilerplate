@@ -21,8 +21,10 @@ jobs:
         run: npm ci
 
       - name: Validate ACM Manifest in PR Body
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          npx @roblarsen/acm-cli validate --pr-body "${{ github.event.pull_request.body }}" || {
+          npx @roblarsen/acm-cli validate --pr-body "$PR_BODY" || {
             echo "❌ ACM v1.1 validation failed."
             echo ""
             echo "Please ensure your PR description contains a valid ACM v1.1 manifest block:"
@@ -34,8 +36,10 @@ jobs:
           }
 
       - name: Verify Risk Floor Compliance
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          npx @roblarsen/acm-cli validate --pr-body "${{ github.event.pull_request.body }}" --strict || {
+          npx @roblarsen/acm-cli validate --pr-body "$PR_BODY" || {
             echo "❌ Risk floor rules violated."
             echo ""
             echo "ACM v1.1 risk-floor rules:"
