@@ -74,6 +74,9 @@ npm start
 Use `--release` (or `-r`) to select a release, `--lang` to set the HTML
 language, and `--yes` (or `-y`) to skip prompts. Run with `--help` (or `-h`)
 for usage, or `--version` (or `-v`) for the CLI version.
+Errors include context and suggestions without stack traces. Use `--debug` or
+set the `DEBUG` environment variable to show diagnostic details and stack
+traces; these details may contain local paths or other sensitive information.
 Release metadata and archives are downloaded from the npm registry using Node's
 native fetch, with a 15-second timeout per request and archive integrity checks.
 The `npm_config_registry` environment variable can select a different registry.

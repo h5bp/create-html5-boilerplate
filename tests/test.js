@@ -301,6 +301,9 @@ test("reports destination collisions and cleans up staging", async (t) => {
     assert.equal(error.code, 1);
     assert.match(error.stderr, /Could not generate project at/);
     assert.match(error.stderr, /ERR_FS_CP_DIR_TO_NON_DIR/);
+    assert.match(error.stderr, /Path: /);
+    assert.match(error.stderr, /Hint: Choose a directory/);
+    assert.doesNotMatch(error.stderr, /\n\s+at /);
     return true;
   });
   assert.equal(await readFile(destination, "utf8"), "keep");
@@ -355,7 +358,7 @@ test(
     await Promise.all(
       [
         ["-r=6..2.3", /not found in npm registry/],
-        ["-r=6..2.3,7.2.3", /Error:/],
+        ["-r=6..2.3,7.2.3", /Reason:/],
       ].map(([version, message]) =>
         t.test(version, async (t) => {
           const work = await workspace(t);
@@ -363,6 +366,12 @@ test(
             runCli(work, ["site", version, "-y"]),
             (error) => {
               assert.match(error.stderr, message);
+              if (version === "-r=6..2.3") {
+                assert.match(error.stderr, /Version: 6\.\.2\.3/);
+                assert.match(error.stderr, /Hint: Choose an available version/);
+                assert.match(error.stderr, /Available versions:/);
+              }
+              assert.doesNotMatch(error.stderr, /\n\s+at /);
               return true;
             },
           );
@@ -528,6 +537,7 @@ test("help and version flags exit without generating a project", async (t) => {
     if (flag === "--help" || flag === "-h") {
       assert.match(stdout, /Usage: create-html5-boilerplate/);
       assert.match(stdout, /--release/);
+      assert.match(stdout, /--debug/);
     } else {
       assert.equal(stdout.trim(), version);
     }

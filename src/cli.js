@@ -2,6 +2,89 @@
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
+import { createLogger } from "./logger.js";
+
+/**
+ * @param {unknown} error
+ * @param {string} destination
+ * @param {string} version
+ * @returns {{message: string, context: import("./logger.js").DiagnosticContext}}
+ */
+function describeFailure(error, destination, version) {
+  const reason = error instanceof Error ? error.message : String(error);
+  const code =
+    error instanceof Error && "code" in error && typeof error.code === "string"
+      ? error.code
+      : undefined;
+  const errorPath =
+    error instanceof Error && "path" in error && typeof error.path === "string"
+      ? error.path
+      : destination;
+
+  if (
+    code === "ETARGET" &&
+    error instanceof Error &&
+    "versions" in error &&
+    Array.isArray(error.versions) &&
+    error.versions.every((value) => typeof value === "string")
+  ) {
+    return {
+      message: `Release version '${version}' not found in npm registry`,
+      context: {
+        version,
+        reason,
+        hint: "Choose an available version or use --release=latest.",
+        availableVersions: [...error.versions].reverse().join(" | "),
+        error,
+      },
+    };
+  }
+  if (code === "EACCES" || code === "EPERM" || code === "EROFS") {
+    return {
+      message: "Permission denied while generating the project",
+      context: {
+        path: errorPath,
+        reason,
+        hint: "Check permissions for the destination and temporary directory, or choose writable locations.",
+        error,
+      },
+    };
+  }
+  if (
+    code === "ENOTDIR" ||
+    code === "EEXIST" ||
+    code === "ERR_FS_CP_DIR_TO_NON_DIR" ||
+    code === "ERR_FS_CP_NON_DIR_TO_DIR"
+  ) {
+    return {
+      message: `Could not generate project at ${destination}`,
+      context: {
+        path: errorPath,
+        reason: `${code}: ${reason}`,
+        hint: "Choose a directory without conflicting files or move the conflicting path.",
+        error,
+      },
+    };
+  }
+  if (
+    reason.startsWith("Failed to fetch release metadata") ||
+    reason.startsWith("Failed to download template archive")
+  ) {
+    return {
+      message: "Template download failed",
+      context: {
+        version,
+        reason,
+        hint: "Check your internet connection, registry URL, and proxy settings.",
+        error,
+      },
+    };
+  }
+  return {
+    message: `Could not generate project at ${destination}`,
+    context: { path: errorPath, version, reason, error },
+  };
+}
 
 /**
  * @param {string} target
@@ -23,8 +106,17 @@ async function pathExists(target) {
  * @returns {Promise<void>}
  */
 export async function runCli(argv = process.argv) {
+  const rawArgs = argv.slice(2);
+  const terminator = rawArgs.indexOf("--");
+  const logger = createLogger({
+    debug: rawArgs
+      .slice(0, terminator < 0 ? undefined : terminator)
+      .includes("--debug"),
+  });
   if (Number(process.versions.node.split(".")[0]) < 20) {
-    console.error("Node.js 20 or higher is required.");
+    logger.error("Node.js 20 or higher is required.", {
+      hint: "Install a supported Node.js version and try again.",
+    });
     process.exitCode = 1;
     return;
   }
@@ -56,6 +148,7 @@ export async function runCli(argv = process.argv) {
         yes: { type: "boolean", short: "y" },
         "no-yes": { type: "boolean" },
         lang: { type: "string" },
+        debug: { type: "boolean" },
       },
     });
   } catch (error) {
@@ -67,7 +160,10 @@ export async function runCli(argv = process.argv) {
     ) {
       throw error;
     }
-    console.error(`Error: ${error.message}`);
+    logger.error("Error: Invalid command-line options", {
+      hint: "Run with --help to see the available options.",
+      error,
+    });
     process.exitCode = 1;
     return;
   }
@@ -84,14 +180,15 @@ export async function runCli(argv = process.argv) {
   const yes = yesToken?.name === "yes";
 
   if (options.help) {
-    console.log(`Usage: create-html5-boilerplate [target-directory] [options]
+    logger.info(`Usage: create-html5-boilerplate [target-directory] [options]
 
 Options:
   -h, --help             Show help
   -v, --version          Show version
   -r, --release <value>  HTML5 Boilerplate release (default: latest)
   -y, --yes              Skip prompts
-      --lang <value>     Set the HTML language`);
+      --lang <value>     Set the HTML language
+      --debug            Show detailed diagnostic information`);
     return;
   }
 
@@ -101,14 +198,19 @@ Options:
       const packageJson = JSON.parse(
         await fs.readFile(new URL("../package.json", import.meta.url), "utf8"),
       );
-      console.log(packageJson.version);
+      logger.info(packageJson.version);
     } catch (error) {
-      console.error(error);
+      logger.error("Could not read the CLI version", {
+        hint: "Reinstall create-html5-boilerplate and try again.",
+        error,
+      });
       process.exitCode = 1;
     }
     return;
   }
 
+  const version = options.release || "latest";
+  const destination = path.resolve(process.cwd(), positionals[0] || "./");
   try {
     const [
       { default: chalk },
@@ -132,8 +234,6 @@ Options:
 
     inquirer.registerPrompt("autocomplete", inquirerAutocompletePrompt);
     const timer = elapsed.start();
-    const version = options.release || "latest";
-    const destination = path.resolve(process.cwd(), positionals[0] || "./");
 
     if ((await pathExists(destination)) && !yes) {
       const folderFiles = await fs.readdir(destination);
@@ -146,7 +246,7 @@ Options:
           default: true,
         });
         if (!override) {
-          console.log(chalk.red("Aborted"));
+          logger.info(chalk.red("Aborted"));
           return;
         }
       }
@@ -163,7 +263,7 @@ Options:
         skipConfiguration: yes,
         onCopied: () => {
           timerDownloaded = timer.get();
-          console.log(destination);
+          logger.info(destination);
         },
         getConfiguration: async () => {
           /** @type {{title: string, value: string}[]} */
@@ -232,35 +332,12 @@ Options:
         ` ${result.nameWithVersion} copied to ${destination} in ${timerDownloaded}. Have fun!`,
       );
     } catch (error) {
-      if (
-        error instanceof Error &&
-        "code" in error &&
-        error.code === "ETARGET" &&
-        "wanted" in error &&
-        typeof error.wanted === "string" &&
-        "versions" in error &&
-        Array.isArray(error.versions) &&
-        error.versions.every((version) => typeof version === "string")
-      ) {
-        const message = chalk.red(
-          `version '${error.wanted}' not found in npm registry\navailable versions:\n`,
-        );
-        spinner.fail(message + error.versions.reverse().join(" | "));
-        process.exitCode = 1;
-        return;
-      }
-      spinner.fail(`Could not generate project at ${destination}`);
+      spinner.stop();
       throw error;
     }
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    const code =
-      error instanceof Error &&
-      "code" in error &&
-      typeof error.code === "string"
-        ? `${error.code}: `
-        : "";
-    console.error(`Error: ${code}${message}`);
+    const diagnostic = describeFailure(error, destination, version);
+    logger.error(diagnostic.message, diagnostic.context);
     process.exitCode = 1;
   }
 }

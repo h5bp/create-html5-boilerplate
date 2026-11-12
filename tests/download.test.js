@@ -221,11 +221,100 @@ test("CLI prints network errors without an unhandled rejection and removes stagi
       ),
       (error) => {
         assert.equal(error.code, 1);
+        assert.match(error.stderr, /Template download failed/);
+        assert.match(error.stderr, /Version: latest/);
+        assert.match(error.stderr, /Hint: Check your internet connection/);
         assert.match(error.stderr, message);
         assert.doesNotMatch(error.stderr, /UnhandledPromiseRejection|\n\s+at /);
         return true;
       },
     );
     assert.deepEqual(await readdir(tmp), []);
+  }
+});
+
+test("CLI debug flag and DEBUG environment show failure details", async (t) => {
+  const root = await workspace(t);
+  const preload = path.join(root, "preload.mjs");
+  await writeFile(
+    preload,
+    `globalThis.fetch = async () => { throw new DOMException("Aborted", "TimeoutError"); };`,
+  );
+  const env = { ...process.env, NO_COLOR: "1" };
+  delete env.DEBUG;
+  for (const [args, debugEnv] of [
+    [["--debug"], {}],
+    [[], { DEBUG: "1" }],
+  ]) {
+    await assert.rejects(
+      execFileAsync(
+        process.execPath,
+        ["--import", preload, entry, "site", "-y", ...args],
+        { cwd: root, env: { ...env, ...debugEnv } },
+      ),
+      (error) => {
+        assert.equal(error.code, 1);
+        assert.match(error.stderr, /Template download failed/);
+        assert.match(error.stderr, /Debug: Error details/);
+        assert.match(error.stderr, /\n\s+at /);
+        assert.match(error.stderr, /TimeoutError/);
+        return true;
+      },
+    );
+  }
+  await assert.rejects(
+    execFileAsync(
+      process.execPath,
+      ["--import", preload, entry, "-y", "--", "--debug"],
+      { cwd: root, env },
+    ),
+    (error) => {
+      assert.equal(error.code, 1);
+      assert.match(error.stderr, /Template download failed/);
+      assert.doesNotMatch(error.stderr, /Debug:|\n\s+at /);
+      return true;
+    },
+  );
+});
+
+test("CLI reports permission failures and version-read errors without stack traces", async (t) => {
+  const root = await workspace(t);
+  const preload = path.join(root, "preload.mjs");
+  await writeFile(
+    preload,
+    `import fs from "node:fs";
+     import { syncBuiltinESMExports } from "node:module";
+     const originalReadFile = fs.promises.readFile;
+     fs.promises.access = async (target) => {
+       throw Object.assign(new Error("permission denied"), { code: "EACCES", path: target });
+     };
+     fs.promises.readFile = async (target, ...args) => {
+       if (String(target).endsWith("/package.json")) {
+         throw Object.assign(new Error("permission denied"), { code: "EACCES", path: String(target) });
+       }
+       return originalReadFile(target, ...args);
+     };
+     syncBuiltinESMExports();`,
+  );
+  const env = { ...process.env, NO_COLOR: "1" };
+  delete env.DEBUG;
+  for (const [args, message, context] of [
+    [["site"], /Permission denied while generating/, /Path: .*site/],
+    [["--version"], /Could not read the CLI version/, /Hint: Reinstall/],
+  ]) {
+    await assert.rejects(
+      execFileAsync(process.execPath, ["--import", preload, entry, ...args], {
+        cwd: root,
+        env,
+      }),
+      (error) => {
+        assert.equal(error.code, 1);
+        assert.match(error.stderr, message);
+        assert.match(error.stderr, context);
+        assert.match(error.stderr, /Reason: permission denied/);
+        assert.doesNotMatch(error.stderr, /\n\s+at /);
+        return true;
+      },
+    );
   }
 });
