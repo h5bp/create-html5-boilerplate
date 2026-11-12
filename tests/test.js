@@ -431,8 +431,8 @@ test("evaluates release-specific configuration prompts", async (t) => {
   });
 
   for (const [version, expected] of [
-    ["7.3.0", -1],
-    ["8.0.0", 0],
+    ["7.3.0", true],
+    ["8.0.0", false],
     ["latest", false],
   ]) {
     const destination = path.join(work.cwd, `site-${version}`);

@@ -313,7 +313,8 @@ Options:
                 type: "confirm",
                 name: "removeJquery",
                 message: "Remove jQuery?",
-                when: version !== "latest" && compareVersions(version, "8.0.0"),
+                when:
+                  version !== "latest" && compareVersions(version, "8.0.0") < 0,
                 default: true,
               },
             ]);
