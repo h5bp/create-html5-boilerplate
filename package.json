@@ -29,6 +29,7 @@
     "format": "prettier --write index.js src/*.js src/*.d.ts tests/*.js eslint.config.js package.json tsconfig.json .github/workflows/*.yml",
     "format:check": "prettier --check index.js src/*.js src/*.d.ts tests/*.js eslint.config.js package.json tsconfig.json .github/workflows/*.yml",
     "coverage": "node --test --experimental-test-coverage --test-coverage-include=\"src/*.js\"",
+    "acm:validate": "acm-cli validate --file",
     "prepare": "husky"
   },
   "files": [
@@ -53,6 +54,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@roblarsen/acm-cli": "^1.1.0",
     "@types/inquirer": "^9.0.10",
     "@types/inquirer-autocomplete-prompt": "^3.0.4",
     "@types/node": "^20.0.0",
