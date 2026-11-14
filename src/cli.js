@@ -3,6 +3,11 @@ import * as fs from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { createLogger } from "./logger.js";
+import { createProjectCommand } from "./commands/create-project.js";
+
+/**
+ * @typedef {import('./prompts/prompt-provider.js').PromptProvider} PromptProvider
+ */
 
 /**
  * @param {unknown} error
@@ -90,7 +95,7 @@ function describeFailure(error, destination, version) {
  * @param {string} target
  * @returns {Promise<boolean>}
  */
-async function pathExists(target) {
+async function pathExistsInCli(target) {
   try {
     await fs.access(target);
     return true;
@@ -103,9 +108,10 @@ async function pathExists(target) {
 
 /**
  * @param {string[]} [argv]
+ * @param {PromptProvider} [prompts]
  * @returns {Promise<void>}
  */
-export async function runCli(argv = process.argv) {
+export async function runCli(argv = process.argv, prompts) {
   const rawArgs = argv.slice(2);
   const terminator = rawArgs.indexOf("--");
   const logger = createLogger({
@@ -148,6 +154,7 @@ export async function runCli(argv = process.argv) {
         yes: { type: "boolean", short: "y" },
         "no-yes": { type: "boolean" },
         lang: { type: "string" },
+        "non-interactive": { type: "boolean" },
         debug: { type: "boolean" },
       },
     });
@@ -186,7 +193,8 @@ Options:
   -h, --help             Show help
   -v, --version          Show version
   -r, --release <value>  HTML5 Boilerplate release (default: latest)
-  -y, --yes              Skip prompts
+  -y, --yes              Skip interactive prompts (use defaults or --flags)
+      --non-interactive  Run in non-interactive mode (CI environments)
       --lang <value>     Set the HTML language
       --debug            Show detailed diagnostic information`);
     return;
@@ -215,36 +223,44 @@ Options:
     const [
       { default: chalk },
       { default: inquirer },
-      { default: fuzzy },
       { default: ora },
       { default: elapsed },
-      { compareVersions },
       { default: inquirerAutocompletePrompt },
-      { generate },
     ] = await Promise.all([
       import("chalk"),
       import("inquirer"),
-      import("fuzzy"),
       import("ora"),
       import("elapsed-time-logger"),
-      import("compare-versions"),
       import("inquirer-autocomplete-prompt"),
-      import("./generator.js"),
     ]);
 
     inquirer.registerPrompt("autocomplete", inquirerAutocompletePrompt);
+
+    // Initialize prompts provider if not injected (for CLI use)
+    if (!prompts) {
+      const isNonInteractive = yes || options["non-interactive"];
+      if (isNonInteractive) {
+        const { CiPrompts } = await import("./prompts/ci-prompts.js");
+        prompts = new CiPrompts();
+      } else {
+        const { InteractivePrompts } =
+          await import("./prompts/interactive-prompts.js");
+        prompts = new InteractivePrompts(inquirer);
+      }
+    }
+
     const timer = elapsed.start();
 
-    if ((await pathExists(destination)) && !yes) {
+    if (
+      (await pathExistsInCli(destination)) &&
+      !yes &&
+      !options["non-interactive"]
+    ) {
       const folderFiles = await fs.readdir(destination);
       if (folderFiles.length !== -1) {
-        /** @type {{override: boolean}} */
-        const { override } = await inquirer.prompt({
-          type: "confirm",
-          name: "override",
-          message: `${destination} is not an empty folder, proceed?`,
-          default: true,
-        });
+        const override = await prompts.confirm(
+          `${destination} is not an empty folder, proceed?`,
+        );
         if (!override) {
           logger.info(chalk.red("Aborted"));
           return;
@@ -257,76 +273,15 @@ Options:
     ).start();
     let timerDownloaded;
     try {
-      const result = await generate({
+      const result = await createProjectCommand({
         destination,
         version,
-        skipConfiguration: yes,
+        lang: options.lang,
+        skipConfiguration: yes || options["non-interactive"],
+        prompts,
         onCopied: () => {
           timerDownloaded = timer.get();
           logger.info(destination);
-        },
-        getConfiguration: async () => {
-          /** @type {{title: string, value: string}[]} */
-          const langsList = JSON.parse(
-            await fs.readFile(
-              new URL("../lib/countries.json", import.meta.url),
-              "utf8",
-            ),
-          );
-          /** @type {Record<string, string>} */
-          const langListMap = {};
-          /** @type {string[]} */
-          const langListOut = [];
-          if (!options.lang) {
-            langsList.forEach(({ title, value }) => {
-              const text = `${title} (${value})`;
-              langListMap[text] = value;
-              langListOut.push(text);
-            });
-            langListOut.splice(1, 0, "Enter custom");
-          }
-          spinner.stop();
-          /** @type {{langChoice?: string, customLang?: string, removeJquery?: boolean}} */
-          const { langChoice, customLang, removeJquery } =
-            await inquirer.prompt([
-              {
-                type: "autocomplete",
-                name: "langChoice",
-                message: "Select language",
-                when: !options.lang,
-                source: async (
-                  /** @type {Record<string, unknown>} */ answers,
-                  input = "",
-                ) =>
-                  fuzzy
-                    .filter(input, langListOut)
-                    .map(({ original }) => original),
-              },
-              {
-                type: "input",
-                name: "customLang",
-                message: "Enter custom language code",
-                when: (/** @type {{langChoice?: string}} */ { langChoice }) =>
-                  !options.lang && langChoice === langListOut[1],
-              },
-              {
-                type: "confirm",
-                name: "removeJquery",
-                message: "Remove jQuery?",
-                when:
-                  version !== "latest" && compareVersions(version, "8.0.0") < 0,
-                default: true,
-              },
-            ]);
-          spinner.start();
-          return {
-            lang:
-              options.lang ||
-              (langChoice && langListMap[langChoice]) ||
-              customLang ||
-              "",
-            removeJquery: removeJquery !== undefined ? removeJquery : false,
-          };
         },
       });
       spinner.succeed(
