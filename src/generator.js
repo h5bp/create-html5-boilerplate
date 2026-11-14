@@ -6,6 +6,10 @@ import glob from "fast-glob";
 import { downloadRelease } from "./download.js";
 
 /**
+ * @typedef {import('./prompts/prompt-provider.js').PromptProvider} PromptProvider
+ */
+
+/**
  * @typedef {Object} Configuration
  * @property {string} [lang] HTML language code.
  * @property {boolean} [removeJquery] Remove jQuery scripts from the generated HTML.
@@ -22,10 +26,58 @@ import { downloadRelease } from "./download.js";
  *   destination: string,
  *   version?: string,
  *   skipConfiguration?: boolean,
- *   onCopied?: (result: GenerateResult) => void | Promise<void>,
- *   getConfiguration?: () => Configuration | Promise<Configuration>
+ *   prompts?: PromptProvider,
+ *   onCopied?: (result: GenerateResult) => void | Promise<void>
  * }} GenerateOptions
  */
+
+/**
+ * Retrieve configuration via interactive prompts.
+ * @param {PromptProvider} prompts Prompt provider instance
+ * @param {string} version Release version being generated
+ * @param {string} [lang] Pre-configured language (if --lang flag was used)
+ * @returns {Promise<Configuration>}
+ */
+async function getInteractiveConfiguration(prompts, version, lang) {
+  const { compareVersions } = await import("compare-versions");
+
+  /** @type {{title: string, value: string}[]} */
+  const langsList = JSON.parse(
+    await fs.readFile(
+      new URL("../lib/countries.json", import.meta.url),
+      "utf8",
+    ),
+  );
+
+  /** @type {import('./prompts/prompt-provider.js').PromptOption[]} */
+  const langOptions = langsList.map(({ title, value }) => ({
+    label: `${title} (${value})`,
+    value,
+  }));
+
+  // Add "Enter custom" option
+  langOptions.splice(1, 0, { label: "Enter custom", value: "__custom__" });
+
+  let selectedLang = lang;
+  if (!lang) {
+    const langChoice = await prompts.select("Select language", langOptions);
+    if (langChoice === "__custom__") {
+      selectedLang = await prompts.text("Enter custom language code");
+    } else {
+      selectedLang = langChoice;
+    }
+  }
+
+  let removeJquery = false;
+  if (version !== "latest" && compareVersions(version, "8.0.0") < 0) {
+    removeJquery = await prompts.confirm("Remove jQuery?");
+  }
+
+  return {
+    lang: selectedLang || "",
+    removeJquery,
+  };
+}
 
 /**
  * Scaffold a project from a published HTML5 Boilerplate release.
@@ -38,8 +90,8 @@ export async function generate({
   lang,
   removeJquery,
   skipConfiguration = false,
+  prompts,
   onCopied,
-  getConfiguration,
 }) {
   const tempDir = await fs.mkdtemp(
     path.join(os.tmpdir(), "html5-boilerplate-staging-"),
@@ -69,8 +121,8 @@ export async function generate({
     );
 
     if (!skipConfiguration) {
-      const configuration = getConfiguration
-        ? await getConfiguration()
+      const configuration = prompts
+        ? await getInteractiveConfiguration(prompts, version, lang)
         : { lang, removeJquery };
       if (configuration.lang !== undefined || configuration.removeJquery) {
         const indexFile = path.join(destination, "index.html");

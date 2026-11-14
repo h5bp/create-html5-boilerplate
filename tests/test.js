@@ -17,7 +17,6 @@ import path from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import inquirer from "inquirer";
 import ssri from "ssri";
 import * as tar from "tar";
 import { generate } from "../src/generator.js";
@@ -391,6 +390,7 @@ test("applies an explicit language", async (t) => {
 });
 
 test("evaluates release-specific configuration prompts", async (t) => {
+  const { TestPrompts } = await import("../src/prompts/test-prompts.js");
   const work = await workspace(t);
   const fixture = path.join(work.cwd, "fixture");
   await mkdir(path.join(fixture, "package", "dist"), { recursive: true });
@@ -422,31 +422,21 @@ test("evaluates release-specific configuration prompts", async (t) => {
   );
   t.mock.method(console, "log", () => {});
   const errors = t.mock.method(console, "error", () => {});
-  let removeJqueryWhen;
-  t.mock.method(inquirer, "prompt", async (questions) => {
-    removeJqueryWhen = questions.find(
-      (question) => question.name === "removeJquery",
-    ).when;
-    return { removeJquery: Boolean(removeJqueryWhen) };
-  });
 
-  for (const [version, expected] of [
+  for (const [version, shouldRemoveJquery] of [
     ["7.3.0", true],
     ["8.0.0", false],
     ["latest", false],
   ]) {
     const destination = path.join(work.cwd, `site-${version}`);
-    await runCliInProcess([
-      "node",
-      entry,
-      destination,
-      "--lang=fr",
-      `--release=${version}`,
-    ]);
-    assert.equal(removeJqueryWhen, expected);
+    const testPrompts = new TestPrompts({ confirm: shouldRemoveJquery });
+    await runCliInProcess(
+      ["node", entry, destination, "--lang=fr", `--release=${version}`],
+      testPrompts,
+    );
     const html = await readFile(path.join(destination, "index.html"), "utf8");
     assert.match(html, /lang="fr"/);
-    assert.equal(html.includes("jquery.js"), !expected);
+    assert.equal(html.includes("jquery.js"), !shouldRemoveJquery);
     await assertStagingRemoved(work.tmp);
   }
   assert.equal(errors.mock.callCount(), 0);
